@@ -12,6 +12,9 @@ vault.init(opts).then((result) => {
   console.log(result)
   vaultSecp256k1.keyInfo(vault, 'm/0').then((result) => {
     console.log(result)
+    vaultSecp256k1.sign(vault, 'm/0', '0123456789012345678901234567890123456789012345678901234567890101').then((result) => {
+      console.log(result)
+    })
   })
 }, (error) => {
   console.log('encountered error: ')
