@@ -9,9 +9,9 @@ function vaultHandleMessage(event) {
   if (event.source == vault) {
     if ('ready' in event.data) {
       exports.message({ 'init' : vaultOpts }).then((result) => {
-        vaultReady(event.data)
+        vaultReady(result)
       }, (reject) => {
-        vaultNotReady(event.data)
+        vaultNotReady(reject)
       })
       return;
     } else {
@@ -49,6 +49,15 @@ exports.message = function (message) {
  * Init the Zipper Vault communication
  * @return {Promise} that resolves when the vault is ready for messaging
 */
+
+exports.launch = function(vaultURI) {
+  // sort out deep linking
+  uri = window.location.href
+  if (window.location.hash.startsWith('#zipper-vault=')) {
+    uri = window.location.href.split('#zipper-vault=')[0]
+  }
+  window.location = vaultURI + '#launch=' + uri
+}
  
 exports.init = function (opts) {
     opts = opts || {};
@@ -57,7 +66,11 @@ exports.init = function (opts) {
         window.addEventListener('message', vaultHandleMessage)
         var iframe = document.createElement('iframe')
         iframe.style.display = 'none'
-        iframe.src = 'https://vault.zipperglobal.com/' // vault URL
+        if ('vaultURL' in opts) {
+          iframe.src = opts.vaultURL
+        } else {
+          iframe.src = 'https://vault.zipperglobal.com/' // vault URL
+        }
         document.body.appendChild(iframe)
         vault = iframe.contentWindow
         vaultOpts = opts
