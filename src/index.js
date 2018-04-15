@@ -29,7 +29,7 @@ function vaultHandleMessage(event) {
 }
 
 /** 
- * Send a message to Zipper Vault
+ * Send a message to Zippie Vault
  * @param {Object} message Dictionary with the message to
  * @return {Promise} that resolves with the response from the vault
  */
@@ -46,15 +46,15 @@ exports.message = function (message) {
 }
 
 /** 
- * Init the Zipper Vault communication
+ * Init the Zippie Vault communication
  * @return {Promise} that resolves when the vault is ready for messaging
 */
 
 exports.launch = function(vaultURI) {
   // sort out deep linking
   uri = window.location.href
-  if (window.location.hash.startsWith('#zipper-vault=')) {
-    uri = window.location.href.split('#zipper-vault=')[0]
+  if (window.location.hash.startsWith('#zippie-vault=')) {
+    uri = window.location.href.split('#zippie-vault=')[0]
   }
   window.location = vaultURI + '#launch=' + uri
 }
@@ -69,7 +69,7 @@ exports.init = function (opts) {
         if ('vaultURL' in opts) {
           iframe.src = opts.vaultURL
         } else {
-          iframe.src = 'https://vault.zipperglobal.com/' // vault URL
+          iframe.src = 'https://vault.zippie.org/' // vault URL
         }
         document.body.appendChild(iframe)
         vault = iframe.contentWindow
