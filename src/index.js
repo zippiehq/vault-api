@@ -53,9 +53,12 @@ exports.message = function (message) {
 exports.launch = function(vaultURI) {
   // sort out deep linking
   uri = window.location.href.split('#')[0]
+  console.log('launching ' + uri)
   if (window.location.hash.startsWith('#zippie-vault=')) {
     uri = window.location.href.split('#zippie-vault=')[0]
+    console.log('split the uri')
   }
+  console.log('redirecting to ' + vaultURI + '#launch=' + uri)
   window.location = vaultURI + '#launch=' + uri
 }
  
