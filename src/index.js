@@ -64,6 +64,17 @@ exports.launch = function(vaultURI) {
  
 exports.init = function (opts) {
     opts = opts || {};
+
+    if (location.hash.startsWith('#zippie-vault=')) {
+      opts.vaultURL = location.hash.slice('#zippie-vault='.length)
+      location.hash = ''
+    }
+
+    if (location.hash.startsWith('#/zippie-vault=')) {
+      opts.vaultURL = location.hash.slice('#/zippie-vault='.length)
+      location.hash = ''
+    }
+
     return new Promise(
       function (resolve, reject) {
         window.addEventListener('message', vaultHandleMessage)
