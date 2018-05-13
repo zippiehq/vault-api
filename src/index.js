@@ -64,6 +64,29 @@ exports.launch = function(vaultURI) {
  
 exports.init = function (opts) {
     opts = opts || {};
+
+    // Handle being loaded by vault inside an iframe.
+    if (location.hash.startsWith('#iframe=')) {
+      opts.cookie = location.hash.slice('#iframe='.length)
+      opts.iframe = true
+      location.hash = ''
+    }
+    if (location.hash.startsWith('#/iframe=')) {
+      opts.cookie = location.hash.slice('#/iframe='.length)
+      opts.iframe = true
+      location.hash = ''
+    }
+
+    /* This handles being launched by vault. */
+    if (location.hash.startsWith('#zippie-vault=')) {
+      opts.vaultURL = location.hash.slice('#zippie-vault='.length)
+      location.hash = ''
+    }
+    if (location.hash.startsWith('#/zippie-vault=')) {
+      opts.vaultURL = location.hash.slice('#/zippie-vault='.length)
+      location.hash = ''
+    }
+
     return new Promise(
       function (resolve, reject) {
         vaultOpts = opts
