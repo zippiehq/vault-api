@@ -58,26 +58,38 @@ exports.launch = function(vaultURI) {
     uri = window.location.href.split('#zippie-vault=')[0]
     console.log('split the uri')
   }
-  console.log('redirecting to ' + vaultURI + '#launch=' + uri)
-  window.location = vaultURI + '#launch=' + uri
+  console.log('redirecting to ' + vaultURI + '#iframe=' + uri)
+  window.location = vaultURI + '#iframe=' + uri
 }
  
 exports.init = function (opts) {
     opts = opts || {};
     return new Promise(
       function (resolve, reject) {
-        window.addEventListener('message', vaultHandleMessage)
-        var iframe = document.createElement('iframe')
-        iframe.style.display = 'none'
-        if ('vaultURL' in opts) {
-          iframe.src = opts.vaultURL
-        } else {
-          iframe.src = 'https://vault.zippie.org/' // vault URL
-        }
-        document.body.appendChild(iframe)
-        vault = iframe.contentWindow
         vaultOpts = opts
         vaultReady = resolve
         vaultNotReady = reject
+
+        window.addEventListener('message', vaultHandleMessage)
+        if (opts.iframe) {
+          console.log("Launched in an iframe, sending init message")
+          vault = window.parent
+          exports.message({ 'init' : vaultOpts }).then((result) => {
+            vaultReady(result)
+          }, (reject) => {
+            vaultNotReady(reject)
+          })
+        }
+        else {
+          var iframe = document.createElement('iframe')
+          iframe.style.display = 'none'
+          if ('vaultURL' in opts) {
+            iframe.src = opts.vaultURL
+          } else {
+            iframe.src = 'https://vault.zippie.org/' // vault URL
+          }
+          document.body.appendChild(iframe)
+          vault = iframe.contentWindow
+        }
       })
 }
