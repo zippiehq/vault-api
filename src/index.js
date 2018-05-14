@@ -87,6 +87,13 @@ exports.init = function (opts) {
       location.hash = ''
     }
 
+    if (!('vaultURL' in opts)) {
+      opts.vaultURL = 'https://vault.zippie.org'
+      if (window.location === 'my.dev.zippie.org') {
+        opts.vaultURL = 'https://vault.dev.zippie.org'
+      }
+    }
+
     return new Promise(
       function (resolve, reject) {
         vaultOpts = opts
@@ -106,11 +113,7 @@ exports.init = function (opts) {
         else {
           var iframe = document.createElement('iframe')
           iframe.style.display = 'none'
-          if ('vaultURL' in opts) {
-            iframe.src = opts.vaultURL
-          } else {
-            iframe.src = 'https://vault.zippie.org/' // vault URL
-          }
+          iframe.src = opts.vaultURL
           document.body.appendChild(iframe)
           vault = iframe.contentWindow
         }
