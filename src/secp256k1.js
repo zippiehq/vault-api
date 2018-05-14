@@ -28,3 +28,35 @@ exports.sign = function(vault, derive, hash) {
     })
   })
 }
+
+/** 
+ * Ask vault to encrypt a message
+ * @param {vault} vault the Vault module
+ * @param {pubkey} hex encoded public key
+ * @param {plaintext} plain text data to encrypt
+ * @return {Promise} that resolves with the response from the vault
+ */
+exports.encrypt = function (vault, pubkey, plaintext) {
+  return vault.message({
+    secp256k1Encrypt: {
+      pubkey: pubkey,
+      plaintext: plaintext
+    }
+  })
+}
+
+/** 
+ * Ask vault to encrypt a message
+ * @param {vault} vault the Vault module
+ * @param {derive} key index
+ * @param {opts} output from secp256k1 encrypt call
+ * @return {Promise} that resolves with the response from the vault
+ */
+exports.decrypt = function (vault, derive, opts) {
+  return vault.message({
+    secp256k1Decrypt: Object.assign({
+      key: { derive: derive }
+    }, opts)
+  })
+}
+
