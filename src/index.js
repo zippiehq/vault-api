@@ -58,8 +58,8 @@ exports.launch = function(vaultURI) {
     uri = window.location.href.split('#zippie-vault=')[0]
     console.log('split the uri')
   }
-  console.log('redirecting to ' + vaultURI + '#iframe=' + uri)
-  window.location = vaultURI + '#iframe=' + uri
+  console.log('redirecting to ' + vaultURI + '#launch=' + uri)
+  window.location = vaultURI + '#launch=' + uri
 }
  
 exports.init = function (opts) {
