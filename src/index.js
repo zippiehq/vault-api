@@ -19,7 +19,11 @@ function vaultHandleMessage(event) {
         let receiver = receivers[event.data.callback]
         delete receivers[event.data.callback]
         if ('error' in event.data) {
-          receiver[1](event.data)
+          if (event.data.error === 'launch' || event.data.error === 'signin') {
+            return launch(event.data.launch)
+          } else {
+            receiver[1](event.data)
+          }
         } else {
           receiver[0](event.data)
         }
@@ -28,12 +32,11 @@ function vaultHandleMessage(event) {
   }  
 }
 
-/** 
+/**
  * Send a message to Zippie Vault
  * @param {Object} message Dictionary with the message to
  * @return {Promise} that resolves with the response from the vault
  */
- 
 exports.message = function (message) {
   return new Promise(function(resolve, reject) {
     let id = 'callback-' + _counter++
@@ -45,77 +48,93 @@ exports.message = function (message) {
   })
 }
 
+function launch(vaultURI) {
+  let uri = window.location.href.split('?')[0]
+  let hash = window.location.hash
+  let params = {}
+
+  // Process URI fragment part for vault params
+  if (hash.indexOf('?') !== -1) {
+    let p = hash.split('?')[1].split(';')
+
+    for (var i = 0; i < p.length; i++) {
+      var kv = p[i].split('=')
+      params[kv[0]] = kv[1]
+    }
+  }
+
+  // sort out deep linking
+  console.log('redirecting to ' + vaultURI + '#?launch=' + uri)
+  window.location = vaultURI + '#?launch=' + uri
+}
+
 /** 
  * Init the Zippie Vault communication
  * @return {Promise} that resolves when the vault is ready for messaging
 */
-
-exports.launch = function(vaultURI) {
-  // sort out deep linking
-  uri = window.location.href.split('#')[0]
-  console.log('launching ' + uri)
-  if (window.location.hash.startsWith('#zippie-vault=')) {
-    uri = window.location.href.split('#zippie-vault=')[0]
-    console.log('split the uri')
-  }
-  console.log('redirecting to ' + vaultURI + '#launch=' + uri)
-  window.location = vaultURI + '#launch=' + uri
-}
- 
 exports.init = function (opts) {
-    opts = opts || {};
+  opts = opts || {};
 
-    // Handle being loaded by vault inside an iframe.
-    if (location.hash.startsWith('#iframe=')) {
-      opts.cookie = location.hash.slice('#iframe='.length)
-      opts.iframe = true
-      location.hash = ''
-    }
-    if (location.hash.startsWith('#/iframe=')) {
-      opts.cookie = location.hash.slice('#/iframe='.length)
-      opts.iframe = true
-      location.hash = ''
-    }
+  // Variables for parameter processing
+  let hash = window.location.hash
+  let params = {}
 
-    /* This handles being launched by vault. */
-    if (location.hash.startsWith('#zippie-vault=')) {
-      opts.vaultURL = location.hash.slice('#zippie-vault='.length)
-      location.hash = ''
-    }
-    if (location.hash.startsWith('#/zippie-vault=')) {
-      opts.vaultURL = location.hash.slice('#/zippie-vault='.length)
-      location.hash = ''
+  // Process URI fragment part for vault params
+  if (hash.indexOf('?') !== -1) {
+    let p = hash.split('?')[1].split(';')
+
+    for (var i = 0; i < p.length; i++) {
+      var kv = p[i].split('=')
+      params[kv[0]] = kv[1]
     }
 
-    if (!('vaultURL' in opts)) {
-      opts.vaultURL = 'https://vault.zippie.org'
-      if (window.location === 'my.dev.zippie.org') {
-        opts.vaultURL = 'https://vault.dev.zippie.org'
+    // Strip params from URI fragment part
+    window.location.hash = hash.slice(0, hash.indexOf('?'))
+  }
+
+  // Handle being loaded by vault inside iframe (legacy)
+  if (params['iframe']) {
+    opts.cookie = params['iframe']
+    opts.iframe = true
+  }
+
+  // Handle being launched by vault
+  if (params['zippie-vault']) {
+    opts.vaultURL = params['zippie-vault']
+  }
+
+  // If no vault URI provided, auto-detect from domain check.
+  if (!('vaultURL' in opts)) {
+    opts.vaultURL = 'https://vault.zippie.org'
+
+    if (window.location.href.indexOf('dev.zippie.org') !== -1) {
+      opts.vaultURL = 'https://vault.dev.zippie.org'
+    }
+  }
+
+  return new Promise(
+    function (resolve, reject) {
+      vaultOpts = opts
+      vaultReady = resolve
+      vaultNotReady = reject
+
+      window.addEventListener('message', vaultHandleMessage)
+      if (opts.iframe) {
+        vault = window.parent
+
+        console.log("Launched in an iframe, sending init message.")
+        return message({ 'init' : opts })
       }
-    }
+      else {
+        var iframe = document.createElement('iframe')
+        iframe.style.display = 'none'
+        iframe.src = opts.vaultURL
+        document.body.appendChild(iframe)
 
-    return new Promise(
-      function (resolve, reject) {
-        vaultOpts = opts
-        vaultReady = resolve
-        vaultNotReady = reject
+        vault = iframe.contentWindow
 
-        window.addEventListener('message', vaultHandleMessage)
-        if (opts.iframe) {
-          console.log("Launched in an iframe, sending init message")
-          vault = window.parent
-          exports.message({ 'init' : vaultOpts }).then((result) => {
-            vaultReady(result)
-          }, (reject) => {
-            vaultNotReady(reject)
-          })
-        }
-        else {
-          var iframe = document.createElement('iframe')
-          iframe.style.display = 'none'
-          iframe.src = opts.vaultURL
-          document.body.appendChild(iframe)
-          vault = iframe.contentWindow
-        }
-      })
+        console.log('Launched plainly, enclave built and waiting for ready signal.')
+        return Promise.resolve()
+      }
+    })
 }
