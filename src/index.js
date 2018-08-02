@@ -117,6 +117,8 @@ exports.init = function (opts) {
 
     if (window.location.href.indexOf('dev.zippie.org') !== -1) {
       opts.vaultURL = 'https://vault.dev.zippie.org'
+    } else if (window.location.href.indexOf('testing.zippie.org') !== -1) {
+      opts.vaultURL = 'https://vault.testing.zippie.org'
     }
   }
 
