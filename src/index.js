@@ -159,6 +159,45 @@ exports.init = function (opts) {
     })
 }
 
+exports.isCardValid = function (cardInfo) {
+  return exports.message({'getCardInfo': cardInfo})
+    .then(r => {
+      return Promise.resolve(r.result !== null)
+    })
+}
+
+/**
+ * Return vault internal card management dapp uri
+ * @return {String} of constructed resource uri
+ */
+exports.getCardEnrollUri = function (path) {
+  path = path || ''
+  let baseuri = 'https://vault.zippie.org/#/'
+  if (window.location.href.indexOf('dev.zippie.org') !== -1) {
+    baseuri = 'https://vault.dev.zippie.org/#/'
+  } else if (window.location.href.indexOf('testing.zippie.org') !== -1) {
+    baseuri = 'https://vault.testing.zippie.org/#/'
+  } else if (vaultOpts.vaultURL) {
+    baseuri = vaultOpts.vaultURL
+  }
+  return baseuri + '?card=' + path
+}
+
+/**
+ * Return users preferred wallet uri for resource
+ * @return {String} of constructed resource uri
+ */
+exports.getWalletUri = function (path) {
+  path = path || ''
+  let baseuri = 'https://my.zippie.org/#/'
+  if (window.location.href.indexOf('dev.zippie.org') !== -1) {
+    baseuri = 'https://my.dev.zippie.org/#/'
+  } else if (window.location.href.indexOf('testing.zippie.org') !== -1) {
+    baseuri = 'https://my.testing.zippie.org/#/'
+  }
+  return baseuri + (path[0] === '/' ? path.slice(1) : path)
+}
+
 /**
  * Create a Zippie Signin button.
  * @return {Button} that when click signs the user in using Zippie
