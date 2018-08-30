@@ -128,7 +128,7 @@ exports.init = function (opts) {
 
   // If we have no zippie-vault URI, we have no access token, so launch vault.
   if (params['zippie-vault'] === undefined) {
-    return launch(opts.vaultURL)
+    return Promise.resolve(launch(opts.vaultURL))
   }
 
   opts.vaultURL = params['zippie-vault']
