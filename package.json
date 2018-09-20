@@ -1,6 +1,6 @@
 {
-  "name": "vault-api",
-  "version": "1.0.0",
+  "name": "@zippie/vault-api",
+  "version": "0.0.1",
   "description": "Client API for Zippie Vault",
   "main": "src/index.js",
   "scripts": {
