@@ -41,7 +41,7 @@ function onIncomingMessage(event) {
     document.body.appendChild(exports.createButton())
 
   } else if ('ready' in event.data) {
-    exports.message({ 'init' : vaultOpts })
+    exports.message({ 'signin' : vaultOpts })
       .then(vaultReady, vaultNotReady)
 
   } else {
@@ -122,16 +122,20 @@ exports.init = function (opts) {
     }
   }
 
+  if (params['zippie-vault'] !== undefined) {
+    opts.vaultURL = params['zippie-vault']
+  }
+
   // XXX: Implement per-dapp vault access token and cookie, then dapps can
   // cache in local storage their access token making this redirect only
   // required on first run.
 
-  // If we have no zippie-vault URI, we have no access token, so launch vault.
-  if (params['zippie-vault'] === undefined) {
+  // If we have no vault "magic" cookie, we have to signin, so launch vault.
+  if (params['vault-cookie'] === undefined) {
     return Promise.resolve(launch(opts.vaultURL))
   }
 
-  opts.vaultURL = params['zippie-vault']
+  opts.vaultURL = opts.vaultURL + '#?magiccookie=' + params['vault-cookie']
 
   // Create invisible, nested vault iframe.
   return new Promise(
@@ -157,6 +161,10 @@ exports.init = function (opts) {
       console.log('Launched plainly, enclave built and waiting for ready signal.')
       return Promise.resolve()
     })
+}
+
+exports.enrollments = function () {
+  return exports.message({enrollments: null})
 }
 
 exports.isCardValid = function (cardInfo) {
