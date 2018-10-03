@@ -188,7 +188,11 @@ exports.getCardEnrollUri = function (path) {
   } else if (vaultOpts.vaultURL) {
     baseuri = vaultOpts.vaultURL
   }
-  return baseuri + ';card=' + path
+
+  // Strip out any unwanted  parameters
+  baseuri = baseuri.split('#')[0]
+
+  return baseuri + '#?card=' + path
 }
 
 /**
