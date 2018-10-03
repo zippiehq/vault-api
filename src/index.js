@@ -168,7 +168,7 @@ exports.enrollments = function () {
 }
 
 exports.isCardValid = function (cardInfo) {
-  return exports.message({'getCardInfo': cardInfo})
+  return exports.message({'cardinfo': cardInfo})
     .then(r => {
       return Promise.resolve(r.result !== null)
     })
@@ -188,7 +188,7 @@ exports.getCardEnrollUri = function (path) {
   } else if (vaultOpts.vaultURL) {
     baseuri = vaultOpts.vaultURL
   }
-  return baseuri + '?card=' + path
+  return baseuri + ';card=' + path
 }
 
 /**
