@@ -124,7 +124,7 @@ exports.init = function (opts) {
 
   // Strip params from URI fragment part
   if (window.location.hash.indexOf('?') !== -1) {
-    window.location.hash = window.location.hash.slice(0, hash.indexOf('?'))
+    window.location.hash = window.location.hash.slice(0, window.location.hash.indexOf('?'))
   }
 
   // If no vault URI provided, auto-detect from domain check.
