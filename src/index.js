@@ -29,6 +29,31 @@ var _counter = 0
 var receivers = {}
 
 /**
+ * Parse opts from URI fragment portion, this is so we can pass parameters
+ * to vault and apps without HTTP server knowledge. The format is: #?q1=v1;q2=v2
+ */
+exports.parseOpts = function (uri) {
+  let parser = document.createElement('a')
+  parser.href = uri
+
+  let hash = parser.hash
+  let paramstr = hash.split('?')[1] || ''
+  hash = hash.split('?')[0]
+
+  let params = {}
+
+  let p = paramstr.split(';')
+  if (p[0] !== '') {
+    for (let i = 0; i < p.length; i++) {
+      let parts = p[i].split('=')
+      params[parts[0]] = parts[1]
+    }
+  }
+
+  return params
+}
+
+/**
  * Internal function, invoked when a message is received from vault.
  */
 function onIncomingMessage(event) {
@@ -95,20 +120,11 @@ exports.init = function (opts) {
   opts = opts || {};
 
   // Variables for parameter processing
-  let hash = window.location.hash
-  let params = {}
+  let params = exports.parseOpts(window.location)
 
-  // Process URI fragment part for vault params
-  if (hash.indexOf('?') !== -1) {
-    let p = hash.split('?')[1].split(';')
-
-    for (var i = 0; i < p.length; i++) {
-      var kv = p[i].split('=')
-      params[kv[0]] = kv[1]
-    }
-
-    // Strip params from URI fragment part
-    window.location.hash = hash.slice(0, hash.indexOf('?'))
+  // Strip params from URI fragment part
+  if (window.location.hash.indexOf('?') !== -1) {
+    window.location.hash = window.location.hash.slice(0, hash.indexOf('?'))
   }
 
   // If no vault URI provided, auto-detect from domain check.
@@ -161,6 +177,14 @@ exports.init = function (opts) {
       console.log('Launched plainly, enclave built and waiting for ready signal.')
       return Promise.resolve()
     })
+}
+
+exports.version = function () {
+  return exports.message({version: null})
+}
+
+exports.config = function () {
+  return exports.message({config: null})
 }
 
 exports.enrollments = function () {
