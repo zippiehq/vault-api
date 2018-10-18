@@ -1,18 +1,18 @@
 {
   "name": "@zippie/vault-api",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "Client API for Zippie Vault",
   "main": "src/index.js",
   "scripts": {
-    "build-test": "webpack; openssl req -x509 -newkey rsa:4096 -nodes -keyout key.pem -out cert.pem -days 365 -subj \"/C=US/ST=./L=./O=./CN=.\"",
-    "test": "webpack; cd dist; http-server -p 8443 -S -K ../key.pem -C ../cert.pem -o"
+    "test": "webpack; webpack-dev-server"
   },
   "author": "Zippie Ltd.",
   "license": "BSD-3-Clause",
   "dependencies": {},
   "devDependencies": {
-    "http-server": "^0.11.1",
+    "callbag-html": "^0.1.0",
     "webpack": "^4.0.1",
-    "webpack-cli": "^2.0.10"
+    "webpack-cli": "^3.1.2",
+    "webpack-dev-server": "^3.1.9"
   }
 }

@@ -91,7 +91,7 @@ function onIncomingMessage(event) {
  * Internal function, invoked when vault asks us to redirect for signin/signup.
  */
 function launch(vaultURI) {
-  console.log('redirecting to ' + vaultURI + '#?launch=' + window.location.href)
+  console.log('API: redirecting to ' + vaultURI + '#?launch=' + window.location.href)
   window.location = vaultURI + '#?launch=' + window.location.href
 }
 
@@ -125,6 +125,27 @@ exports.init = function (opts) {
   // Strip params from URI fragment part
   if (window.location.hash.indexOf('?') !== -1) {
     window.location.hash = window.location.hash.slice(0, window.location.hash.indexOf('?'))
+  }
+
+  // DApp IPC Mode, running in an IFrame inside the vault
+  // XXX: maybe we should validate that we are talking to the actual vault
+  if('ipc-mode' in opts)
+  {
+    console.log('API: setting parent window as vault instance')
+
+    vault = parent
+    vaultOpts = opts
+
+    return new Promise(
+      function (resolve, reject) {
+        vaultReady = resolve
+        vaultNotReady = reject
+
+        window.addEventListener('message', onIncomingMessage)
+
+        return Promise.resolve()
+      }
+    )
   }
 
   // If no vault URI provided, auto-detect from domain check.
@@ -174,7 +195,7 @@ exports.init = function (opts) {
       document.body.appendChild(iframe)
       vault = iframe.contentWindow
 
-      console.log('Launched plainly, enclave built and waiting for ready signal.')
+      console.log('API: Launched plainly, enclave built and waiting for ready signal.')
       return Promise.resolve()
     })
 }
