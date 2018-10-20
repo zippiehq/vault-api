@@ -19,6 +19,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
 */
+
+import { getCookie, setCookie } from 'tiny-cookie'
+
 var vault = null
 
 var vaultOpts = null
@@ -32,7 +35,7 @@ var receivers = {}
  * Parse opts from URI fragment portion, this is so we can pass parameters
  * to vault and apps without HTTP server knowledge. The format is: #?q1=v1;q2=v2
  */
-exports.parseOpts = function (uri) {
+export function parseOpts(uri) {
   let parser = document.createElement('a')
   parser.href = uri
 
@@ -63,10 +66,10 @@ function onIncomingMessage(event) {
 
   // Vault sent ready message, 
   if ('login' in event.data) {
-    document.body.appendChild(exports.createButton())
+    document.body.appendChild(createButton())
 
   } else if ('ready' in event.data) {
-    exports.message({ 'signin' : vaultOpts })
+    message({ 'signin' : vaultOpts })
       .then(vaultReady, vaultNotReady)
 
   } else {
@@ -100,7 +103,7 @@ function launch(vaultURI) {
  * @param {Object} message Dictionary with the message to
  * @return {Promise} that resolves with the response from the vault
  */
-exports.message = function (message) {
+export function message(message) {
   return new Promise(function(resolve, reject) {
     let id = 'callback-' + _counter++
 
@@ -116,15 +119,20 @@ exports.message = function (message) {
  * Init the Zippie Vault communication
  * @return {Promise} that resolves when the vault is ready for messaging
 */
-exports.init = function (opts) {
+export function init(opts) {
   opts = opts || {};
 
   // Variables for parameter processing
-  let params = exports.parseOpts(window.location)
+  let params = parseOpts(window.location)
 
   // Strip params from URI fragment part
   if (window.location.hash.indexOf('?') !== -1) {
     window.location.hash = window.location.hash.slice(0, window.location.hash.indexOf('?'))
+  }
+
+  if(isUserOnboarded() == false)
+  {
+    setCookie('autoSignInWith','zippieVault')
   }
 
   // DApp IPC Mode, running in an IFrame inside the vault
@@ -200,20 +208,35 @@ exports.init = function (opts) {
     })
 }
 
-exports.version = function () {
-  return exports.message({version: null})
+export function isUserOnboarded() {
+  var isSetup = false
+
+  // Check the set cookie for returning customers
+  // TODO: integrate this with the vault better
+  var signInWith = getCookie('autoSignInWith');
+
+  if(signInWith == 'zippieVault')
+  {
+    isSetup = true
+  }
+
+  return isSetup
 }
 
-exports.config = function () {
-  return exports.message({config: null})
+export function version() {
+  return message({version: null})
 }
 
-exports.enrollments = function () {
-  return exports.message({enrollments: null})
+export function config() {
+  return message({config: null})
 }
 
-exports.isCardValid = function (cardInfo) {
-  return exports.message({'cardinfo': cardInfo})
+export function enrollments() {
+  return message({enrollments: null})
+}
+
+export function isCardValid(cardInfo) {
+  return message({'cardinfo': cardInfo})
     .then(r => {
       return Promise.resolve(r.result !== null)
     })
@@ -223,7 +246,7 @@ exports.isCardValid = function (cardInfo) {
  * Return vault internal card management dapp uri
  * @return {String} of constructed resource uri
  */
-exports.getCardEnrollUri = function (path) {
+export function getCardEnrollUri(path) {
   path = path || ''
   let baseuri = 'https://vault.zippie.org/#/'
   if (window.location.href.indexOf('dev.zippie.org') !== -1) {
@@ -244,7 +267,7 @@ exports.getCardEnrollUri = function (path) {
  * Return users preferred wallet uri for resource
  * @return {String} of constructed resource uri
  */
-exports.getWalletUri = function (path) {
+export function getWalletUri(path) {
   path = path || ''
   let baseuri = 'https://my.zippie.org/#/'
   if (window.location.href.indexOf('dev.zippie.org') !== -1) {
@@ -259,23 +282,25 @@ exports.getWalletUri = function (path) {
  * Create a Zippie Signin button.
  * @return {Button} that when click signs the user in using Zippie
  */
-exports.createButton = function () {
+export function createButton() {
   // XXX: Hand off button management to Dapp, so they can place it where they
   // please. Also need to manage state visible, not visible, etc. properly.
   var button = document.createElement('button')
   button.id = 'zippie-btn'
-  button.style = 'position: absolute; right: 0; top: 0; border: 1px solid #000'
+  button.style = 'margin: 0; padding: 0; border: none;'
   button.innerHTML = 'Zippie Signin'
 
   button.onclick = function () {
     console.log('API: Signing in with Zippie')
-    exports.message({'login': null})
-      .then(
-        result => {
-          button.style.display = 'none'
-        },
-        error => {
-        })
+
+    message({'login': null})
+    .then(
+      result => {
+        button.style.display = 'none'
+      },
+      error => {
+      }
+    )    
   }
 
   return button

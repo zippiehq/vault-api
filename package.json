@@ -1,14 +1,20 @@
 {
   "name": "@zippie/vault-api",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "description": "Client API for Zippie Vault",
   "main": "src/index.js",
+  "author": "Zippie Ltd.",
+  "license": "BSD-3-Clause",
+  "repository": {
+    "type" : "git",
+    "url" : "https://github.com/zippie/vault-api.git"
+  },
   "scripts": {
     "test": "webpack; webpack-dev-server"
   },
-  "author": "Zippie Ltd.",
-  "license": "BSD-3-Clause",
-  "dependencies": {},
+  "dependencies": {
+    "tiny-cookie": "^2.1.2"
+  },
   "devDependencies": {
     "callbag-html": "^0.1.0",
     "webpack": "^4.0.1",
