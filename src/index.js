@@ -177,7 +177,7 @@ export function init(opts) {
 
   // If we have no vault "magic" cookie, we have to signin, so launch vault.
   if (params['vault-cookie'] === undefined) {
-    return Promise.resolve(launch(opts.vaultURL))
+    return Promise.reject(launch(opts.vaultURL))
   }
 
   opts.vaultURL = opts.vaultURL + '#?magiccookie=' + params['vault-cookie']
