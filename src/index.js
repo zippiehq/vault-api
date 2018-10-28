@@ -93,9 +93,15 @@ function onIncomingMessage(event) {
 /**
  * Internal function, invoked when vault asks us to redirect for signin/signup.
  */
-function launch(vaultURI) {
-  console.log('API: redirecting to ' + vaultURI + '#?launch=' + window.location.href)
-  window.location = vaultURI + '#?launch=' + window.location.href
+function launch(vaultURI, returnURI) {
+  var callback = window.location.href
+
+  if(returnURI !== undefined) {
+    callback = returnURI
+  }
+
+  console.log('API: redirecting to ' + vaultURI + '#?launch=' + callback)
+  window.location = vaultURI + '#?launch=' + callback
 }
 
 /**
@@ -177,7 +183,7 @@ export function init(opts) {
 
   // If we have no vault "magic" cookie, we have to signin, so launch vault.
   if (params['vault-cookie'] === undefined) {
-    return Promise.reject(launch(opts.vaultURL))
+    return Promise.reject(launch(opts.vaultURL, opts.returnURI))
   }
 
   opts.vaultURL = opts.vaultURL + '#?magiccookie=' + params['vault-cookie']
