@@ -4,7 +4,7 @@ Zippie Vault API is the main application interface into [Zippie Vault](https://g
 
 Zippie Vault API provides a simple interface for interacting with Zippie Vault derived cryptographic keys allowing cryptographic signing and encryption of arbitrary data.
 
-Currently the only cryptographic algorithm implemented is Eliptic Curve secp256k1 suitable for Bitcoin and Ethereum Wallets.
+Currently the only cryptographic algorithm implemented is Elliptic Curve secp256k1 suitable for Bitcoin and Ethereum Wallets.
 
 ## Key Paths
 Key paths are to be given in the following format of maximum 16bit integer numbers
