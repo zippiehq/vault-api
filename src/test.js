@@ -2,6 +2,7 @@ import { div, h1, span, br } from 'callbag-html'
 import * as vault from './index.js'
 import { keyInfo, sign, encrypt, decrypt } from './secp256k1.js'
 import * as shajs from 'sha.js'
+import * as wallet from './wallet_api.js'
 
 function testLog(message)
 {
@@ -17,7 +18,7 @@ testLog('--- Zippie Vault Tests ---')
 
 testLog('--- Test #1: Init ---')
 
-var opts = {vaultURL: 'https://localhost:8443'}
+var opts = {vaultURL: 'https://vault.dev.zippie.org'}
 
 // Init Zippie vault
 vault.init(opts).then(
@@ -62,6 +63,24 @@ vault.init(opts).then(
             });
         });
     });
+
+    testLog('--- Test #5: Enrollments ---')
+    vault.enrollments().then( (result) => {
+      testLog("enrollments: " + JSON.stringify(result))
+    })
+    
+    testLog('--- Test #6 Wallet API ---')
+    wallet.walletInit(vault, 'https://my.dev.zippie.org').then(() => {
+      testLog('Wallet Init Return')
+
+      testLog('Test Wallet Call')
+      wallet.getPassportInfo(vault).then((result) => {
+        testLog('Get Passport Info Return')
+        testLog(result)
+      })
+
+    })
+
   },
   error => {
     testLog("encountered error: " + error);

@@ -136,11 +136,6 @@ export function init(opts) {
     window.location.hash = window.location.hash.slice(0, window.location.hash.indexOf('?'))
   }
 
-  if(isUserOnboarded() == false)
-  {
-    setCookie('autoSignInWith','zippieVault')
-  }
-
   // DApp IPC Mode, running in an IFrame inside the vault
   // XXX: maybe we should validate that we are talking to the actual vault
   if('ipc-mode' in opts)
@@ -157,7 +152,7 @@ export function init(opts) {
 
         window.addEventListener('message', onIncomingMessage)
 
-        return Promise.resolve()
+        return resolve()
       }
     )
   }
@@ -175,6 +170,11 @@ export function init(opts) {
 
   if (params['zippie-vault'] !== undefined) {
     opts.vaultURL = params['zippie-vault']
+  }
+
+  if(isUserOnboarded() == false)
+  {
+    setCookie('autoSignInWith','zippieVault')
   }
 
   // XXX: Implement per-dapp vault access token and cookie, then dapps can
@@ -210,7 +210,6 @@ export function init(opts) {
       vault = iframe.contentWindow
 
       console.log('API: Launched plainly, enclave built and waiting for ready signal.')
-      return Promise.resolve()
     })
 }
 
