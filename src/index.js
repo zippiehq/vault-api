@@ -20,8 +20,6 @@
  * SOFTWARE.
 */
 
-import { getCookie, setCookie } from 'tiny-cookie'
-
 var vault = null
 
 var vaultOpts = null
@@ -172,11 +170,6 @@ export function init(opts) {
     opts.vaultURL = params['zippie-vault']
   }
 
-  if(isUserOnboarded() == false)
-  {
-    setCookie('autoSignInWith','zippieVault')
-  }
-
   // XXX: Implement per-dapp vault access token and cookie, then dapps can
   // cache in local storage their access token making this redirect only
   // required on first run.
@@ -211,21 +204,6 @@ export function init(opts) {
 
       console.log('API: Launched plainly, enclave built and waiting for ready signal.')
     })
-}
-
-export function isUserOnboarded() {
-  var isSetup = false
-
-  // Check the set cookie for returning customers
-  // TODO: integrate this with the vault better
-  var signInWith = getCookie('autoSignInWith');
-
-  if(signInWith == 'zippieVault')
-  {
-    isSetup = true
-  }
-
-  return isSetup
 }
 
 export function version() {
