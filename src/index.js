@@ -288,3 +288,5 @@ export function createButton() {
 
   return button
 }
+
+export default {parseOpts, message, init, version, config, enrollments, isCardValid, getCardEnrollUri, getWalletUri, createButton}

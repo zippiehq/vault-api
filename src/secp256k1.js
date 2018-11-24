@@ -60,3 +60,4 @@ export function decrypt(vault, derive, opts) {
   })
 }
 
+export default {keyInfo, sign, encrypt, decrypt}
