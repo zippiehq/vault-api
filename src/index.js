@@ -83,6 +83,10 @@ function onIncomingMessage(event) {
         return receiver[1](event.data)
       }
 
+      if('result' in event.data) {
+        return receiver[0](event.data.result)
+      }
+
       return receiver[0](event.data)
     }
   }

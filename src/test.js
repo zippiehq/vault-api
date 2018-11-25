@@ -53,13 +53,13 @@ vault.init(opts).then(
       // NB: Usually you would use someone elses public key
       encrypt(vault, result.pubkey, Buffer.from("message to encrypt").toString('hex'))
         .then(encResult => {
-          testLog("encrypt: " + encResult.result.ciphertext);
+          testLog("encrypt: " + encResult.ciphertext);
 
           testLog('--- Test #5: Decrypt ---')
           // Decrypt a message
-          decrypt(vault, 'm/0', encResult.result)
+          decrypt(vault, 'm/0', encResult)
             .then(message => {
-              testLog("decrypt: " + Buffer.from(message.result, 'hex').toString());
+              testLog("decrypt: " + Buffer.from(message, 'hex').toString());
             });
         });
     });
@@ -70,17 +70,25 @@ vault.init(opts).then(
     })
     
     testLog('--- Test #6 Wallet API ---')
-    wallet.walletInit(vault, 'https://my.dev.zippie.org').then(() => {
+    wallet.walletInit(vault, 'https://localhost:3000').then(() => {
       testLog('Wallet Init Return')
 
       testLog('Test Wallet Call')
       wallet.getPassportInfo(vault).then((result) => {
         testLog('Get Passport Info Return')
-        testLog(result)
+        testLog('passport info: ' +JSON.stringify(result))
+        })
+
+        wallet.getAddressForToken(vault, '0x374FaBa19192a123Fbb0c3990e3EeDcFeeaad42A').then((result) => {
+          testLog('ZIPT address: ' + JSON.stringify(result))
       })
 
-    })
+      wallet.getAddressForToken(vault, '0xd0A1E359811322d97991E03f863a0C30C2cF029C').then((result) => {
+        testLog('WETH address ' + JSON.stringify(result))
 
+        wallet.createBlankCheque(vault, result, 10, 'lets go')
+      })
+    })
   },
   error => {
     testLog("encountered error: " + error);

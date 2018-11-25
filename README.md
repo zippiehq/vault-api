@@ -86,7 +86,7 @@ The data needs to be encoded into a hex string before sending
 ```javascript
 encrypt(vault, publicKey, Buffer.from("message to encrypt").toString('hex'))
   .then(encryptedMessage => {
-    console.log("encrypt: " + encryptedMessage.result.ciphertext);
+    console.log("encrypt: " + encryptedMessage.ciphertext);
   }
 );
 ```
@@ -95,9 +95,9 @@ encrypt(vault, publicKey, Buffer.from("message to encrypt").toString('hex'))
 Reverse the encryption process to get back your message
 
 ```javascript
-decrypt(vault, 'm/0', encryptedMessage.result)
+decrypt(vault, 'm/0', encryptedMessage)
   .then(message => {
-    console.log("decrypt: " + Buffer.from(message.result, 'hex').toString());
+    console.log("decrypt: " + Buffer.from(message, 'hex').toString());
   }
 );
 ```

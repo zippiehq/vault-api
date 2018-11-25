@@ -6,11 +6,7 @@
 */
 
 export function keyInfo(vault, derive) {     
-  return new Promise(function(resolve, reject) {
-    vault.message({'secp256k1KeyInfo' : { key: { derive: derive } }}).then(function(result) { 
-      resolve(result.result)
-    })
-  })
+  return vault.message({'secp256k1KeyInfo' : { key: { derive: derive } }})
 }
 
 /** 
@@ -22,11 +18,7 @@ export function keyInfo(vault, derive) {
 */
  
 export function sign(vault, derive, hash) {
-  return new Promise(function(resolve, reject) { 
-    vault.message({'secp256k1Sign' : { key: { derive: derive }, hash: hash }}).then(function(result) { 
-      resolve(result.result)
-    })
-  })
+  return vault.message({'secp256k1Sign' : { key: { derive: derive }, hash: hash }})
 }
 
 /** 

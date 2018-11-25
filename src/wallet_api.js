@@ -24,12 +24,7 @@ var walletApiUrl = 'https://my.zippie.org'
 
 function messageWallet(vault, call, args)
 {
-    return new Promise(function(resolve, reject) {
-        vault.message({'IPCRouterRequest' : {target: walletApiUrl, payload: {call: call, args: args }}})
-            .then(function(result) {
-                resolve(result.result)
-            })
-    })
+    return vault.message({'IPCRouterRequest' : {target: walletApiUrl, payload: {call: call, args: args }}})
 }
 
 export function walletInit(vault, apiUrl) {
@@ -54,3 +49,9 @@ export function getPassportInfo(vault) {
 export function getPassportImage(vault) {
     return messageWallet(vault, 'getPassportImage')
 }
+
+export function createBlankCheque(vault, tokenAccount, amount, message) {
+  return messageWallet(vault, 'createBlankCheque', {tokenAccount, amount, message})
+}
+
+export default { walletInit, getAddressForToken, getPassportInfo, getPassportImage, createBlankCheque }
