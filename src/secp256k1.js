@@ -5,12 +5,8 @@
  * @return {Promise} where resolve gets the public key and public extended key in a dictionary
 */
 
-exports.keyInfo = function(vault, derive) {     
-  return new Promise(function(resolve, reject) {
-    vault.message({'secp256k1KeyInfo' : { key: { derive: derive } }}).then(function(result) { 
-      resolve(result.result)
-    })
-  })
+export function keyInfo(vault, derive) {     
+  return vault.message({'secp256k1KeyInfo' : { key: { derive: derive } }})
 }
 
 /** 
@@ -21,12 +17,8 @@ exports.keyInfo = function(vault, derive) {
  * @return {Promise} a promise where the resolve returns a string with the particular signature
 */
  
-exports.sign = function(vault, derive, hash) {
-  return new Promise(function(resolve, reject) { 
-    vault.message({'secp256k1Sign' : { key: { derive: derive }, hash: hash }}).then(function(result) { 
-      resolve(result.result)
-    })
-  })
+export function sign(vault, derive, hash) {
+  return vault.message({'secp256k1Sign' : { key: { derive: derive }, hash: hash }})
 }
 
 /** 
@@ -36,7 +28,7 @@ exports.sign = function(vault, derive, hash) {
  * @param {plaintext} plain text data to encrypt
  * @return {Promise} that resolves with the response from the vault
  */
-exports.encrypt = function (vault, pubkey, plaintext) {
+export function encrypt(vault, pubkey, plaintext) {
   return vault.message({
     secp256k1Encrypt: {
       pubkey: pubkey,
@@ -52,7 +44,7 @@ exports.encrypt = function (vault, pubkey, plaintext) {
  * @param {opts} output from secp256k1 encrypt call
  * @return {Promise} that resolves with the response from the vault
  */
-exports.decrypt = function (vault, derive, opts) {
+export function decrypt(vault, derive, opts) {
   return vault.message({
     secp256k1Decrypt: Object.assign({
       key: { derive: derive }
@@ -60,3 +52,4 @@ exports.decrypt = function (vault, derive, opts) {
   })
 }
 
+export default {keyInfo, sign, encrypt, decrypt}
