@@ -10,11 +10,16 @@
     "url": "https://github.com/zippie/vault-api.git"
   },
   "scripts": {
-    "test": "webpack; webpack-dev-server"
+    "test": "webpack-dev-server",
+    "example": "webpack-dev-server --config webpack.example.js"
   },
   "dependencies": {},
   "devDependencies": {
     "callbag-html": "^0.1.0",
+    "chai": "^4.2.0",
+    "html-webpack-plugin": "^3.2.0",
+    "mocha": "^5.2.0",
+    "script-loader": "^0.7.2",
     "webpack": "^4.0.1",
     "webpack-cli": "^3.1.2",
     "webpack-dev-server": "^3.1.9"
