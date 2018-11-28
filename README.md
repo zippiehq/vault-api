@@ -30,15 +30,23 @@ npm install
 ```
 
 ## Run Tests
+Mocha unit tests need to be run through a web browser
+
 ```bash
 npm run test
+```
+## Example
+API Usage examples are available in [example.js](./src/example.js) and can be run with the following command:
+
+```bash
+npm run example
 ```
 
 ## API
 
 ### Imports
 ```javascript
-import * as vault from 'vault-api';
+import vault from 'vault-api';
 import { keyInfo, sign, encrypt, decrypt } from './secp256k1.js'
 import * as shajs from 'sha.js';
 ```
