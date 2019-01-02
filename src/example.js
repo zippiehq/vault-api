@@ -3,6 +3,7 @@ import * as vault from './index.js'
 import { keyInfo, sign, encrypt, decrypt } from './secp256k1.js'
 import * as shajs from 'sha.js'
 import * as wallet from './wallet_api.js'
+import * as constants from './constants'
 
 function testLog(message)
 {
@@ -18,7 +19,7 @@ testLog('--- Zippie Vault-API Examples ---')
 
 testLog('--- Example #1: Init ---')
 
-var opts = {vaultURL: 'https://vault.zippie.org'}
+var opts = {vaultURL: constants.ZippieVaultURL}
 
 // Init Zippie vault
 vault.init(opts).then(
@@ -70,7 +71,7 @@ vault.init(opts).then(
     })
 
     testLog('--- Example #6 Wallet API ---')
-    wallet.walletInit(vault, 'https://localhost:3000').then(() => {
+    wallet.walletInit(vault, constants.ZippieWalletURL).then(() => {
       testLog('Wallet Init Return')
 
       testLog('Test Wallet Call')
@@ -80,13 +81,26 @@ vault.init(opts).then(
         testLog('passport info: ' +JSON.stringify(result))
         })
 
-        wallet.getAddressForToken(vault, '0x374FaBa19192a123Fbb0c3990e3EeDcFeeaad42A').then((result) => {
-          testLog('ZIPT address: ' + JSON.stringify(result))
+      wallet.fetchBlankCheck(vault, 'c2b498e9df88554ed458054b10f355d96ac4a2a71b624ab6c6f5ee7e286894e6,bce700bc66f0958d9ab0249a701009b6ec9b9dc939fdf9450fa56ccf5fbf1d1c').then((result) => {
+        testLog('Blank Check ' + JSON.stringify(result))
+
+        wallet.claimBlankCheck(vault, result).then((claim) => {
+          testLog('Claim Check ' + JSON.stringify(claim))
+        })
       })
 
+      wallet.getAddressForToken(vault, '0x374FaBa19192a123Fbb0c3990e3EeDcFeeaad42A').then((result) => {
+          testLog('ZIPT address: ' + JSON.stringify(result))
+
+          wallet.getTokenBalance(vault, '0x374FaBa19192a123Fbb0c3990e3EeDcFeeaad42A').then((result) => {
+            testLog('MultisigInfo ' + JSON.stringify(result))
+          })
+      })
+      
       wallet.getAddressForToken(vault, '0xd0A1E359811322d97991E03f863a0C30C2cF029C').then((result) => {
         testLog('WETH address ' + JSON.stringify(result))
       })
+      
     })
   },
   error => {
