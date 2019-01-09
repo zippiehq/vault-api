@@ -1,5 +1,5 @@
 import { div, h1, span, br } from 'callbag-html'
-import * as vault from './index.js'
+import Vault from './index.js'
 import { keyInfo, sign, encrypt, decrypt } from './secp256k1.js'
 import * as shajs from 'sha.js'
 import * as wallet from './wallet_api.js'
@@ -18,10 +18,12 @@ testLog('--- Zippie Vault-API Examples ---')
 
 testLog('--- Example #1: Init ---')
 
-var opts = {vaultURL: 'https://vault.zippie.org'}
+var opts = {}
 
 // Init Zippie vault
-vault.init(opts).then(
+let vault = new Vault(opts)
+vault.setup()
+.then(
   result => {
     testLog('Init Result: ');
     testLog(result)

@@ -20,286 +20,238 @@
  * SOFTWARE.
 */
 
-var vault = null
-
-var vaultOpts = null
-var vaultReady = null
-var vaultNotReady = null
-
-var _counter = 0
-var receivers = {}
-
 /**
- * Parse opts from URI fragment portion, this is so we can pass parameters
- * to vault and apps without HTTP server knowledge. The format is: #?q1=v1;q2=v2
+ * Vault API
  */
-export function parseOpts(uri) {
-  let parser = document.createElement('a')
-  parser.href = uri
+export default class Vault {
+  /**
+   * opts:
+   *   vault_uri - Zippie vault location
+   */
+  constructor (opts) {
+    opts = opts || {}
 
-  let hash = parser.hash
-  let paramstr = hash.split('?')[1] || ''
-  hash = hash.split('?')[0]
+    // Parse params from URI fragment
+    this.__params = this.__parse_opts(window.location)
 
-  let params = {}
-
-  let p = paramstr.split(';')
-  if (p[0] !== '') {
-    for (let i = 0; i < p.length; i++) {
-      let parts = p[i].split('=')
-      params[parts[0]] = parts[1]
+    // Strip params from URI fragment
+    if (window.location.hash.indexOf('?') !== -1) {
+      window.location.hash = window.location.hash.slice(0, window.location.hash.indexOf('?'))
     }
+
+    // Enclave DOM objects
+    this.__iframe = null
+    this.__vault = null
+
+    // Message receiver dispatch variables
+    this.__callback_counter = 0
+    this.__receivers = {}
+
+    // Construct iframe to load vault enclave
+    var iframe = document.createElement('iframe')
+
+    iframe.style.display = 'none'
+
+    iframe.sandbox += ' allow-storage-access-by-user-activation'
+    iframe.sandbox += ' allow-same-origin'
+    iframe.sandbox += ' allow-scripts'
+
+    // Setup vault URI default if none provided in constructor opts.
+    if (!opts.vault_uri) {
+      opts.vault_uri = 'https://vault.zippie.org'
+
+      if (window.location.host.indexOf('dev.zippie.org') !== -1) {
+        opts.vault_uri = 'https://vault.dev.zippie.org'
+      } else
+      if (window.location.host.indexOf('testing.zippie.org') !== -1) {
+        opts.vault_uri = 'https://vault.testing.zippie.org'
+      }
+    }
+
+    // If vault URI set in local storage, it overrides above default.
+    if (window.localStorage.getItem('zippie-vault-url') !== null) {
+      opts.vault_uri = window.localStorage.getItem('zippie-vault-url')
+    }
+
+    // 'zippie-vault' query parameter overrides and persists to local storage.
+    if (this.__params['zippie-vault'] !== undefined) {
+      opts.vault_uri = this.__params['zippie-vault']
+      window.localStorage.setItem('zippie-vault-url', opts.vault_uri)
+    }
+
+    // Add vault enclave iframe to DOM
+    this.__opts = opts
+
+    document.body.appendChild(iframe)
+    this.__iframe = iframe
+    this.__vault = iframe.contentWindow
   }
 
-  return params
-}
 
-/**
- * Internal function, invoked when a message is received from vault.
- */
-function onIncomingMessage(event) {
-  if (event.source !== vault) return;
+  /**
+   *   Initialize vault enclave by loading in vault source with magiccookie key
+   * if we have one available. Resolves when enclave is ready for commands.
+   */
+  setup () {
+    return new Promise(function (resolve, reject) {
+      // Setup incoming message handler.
+      window.addEventListener('message', this.__on_message.bind(this))
 
-  console.log('API: Received:', event.data)
+      if ('ipc-mode' in this.__opts) return resolve()
 
-  // Vault sent ready message, 
-  if ('login' in event.data) {
-    document.body.appendChild(createButton())
+      this.__onSetupReady = resolve
+      this.__onSetupError = reject
 
-  } else if ('ready' in event.data) {
-    message({ 'signin' : vaultOpts })
-      .then(vaultReady, vaultNotReady)
-
-  } else {
-    if (event.data.callback && receivers[event.data.callback]) {
-      let receiver = receivers[event.data.callback]
-      delete receivers[event.data.callback]
-
-      if ('error' in event.data) {
-        if (event.data.error === 'launch' || event.data.error === 'signin') {
-          return launch(event.data.launch)
-        }
-
-        return receiver[1](event.data)
+      let magiccookie = window.localStorage.getItem('zippie-vault-cookie')
+      if (this.__params['vault-cookie'] !== undefined) {
+        magiccookie = this.__params['vault-cookie']
+        window.localStorage.setItem('zippie-vault-cookie', magiccookie)
       }
 
-      if('result' in event.data) {
+      if (magiccookie !== null) {
+        this.__iframe.src = this.__opts.vault_uri + '#?magiccookie=' + magiccookie
+      } else {
+        this.__iframe.src = this.__opts.vault_uri
+      } 
+
+      console.info('VAULT-API: Loading vault from URI:', this.__iframe.src)
+    }.bind(this))
+  }
+
+
+  /**
+   *   When vault is setup correctly, this function initiates a signin process
+   * should be called from an interactive user component, like a button to work
+   * correctly with Safari browsers that have ITP 2.0
+   */
+  signin (noLogin) {
+    let promise
+
+    if (noLogin) {
+      promise = new Promise(function (resolve, reject) { resolve() })
+    } else {
+      promise = this.message({login: null})
+    }
+
+    return promise
+      .then(function () {
+        if (this.isSignedIn === undefined) return Promise.reject('Not setup')
+
+        let magiccookie = window.localStorage.getItem('zippie-vault-cookie')
+        if (magiccookie === undefined) {
+          window.location = this.__opts.vault_uri + '#?launch=' + window.location
+          return
+        }
+
+        return this.message({signin: null})
+      }.bind(this))
+      .then(function (r) {
+        if (r && 'error' in r && 'launch' in r) {
+          window.location = r.launch + '#?launch=' + window.location
+          return
+        }
+      })
+  }
+
+
+  /**
+   *   Send a request command to vault enclave. Returns a promise that resolves
+   * or rejects depending on the result received back from the enclave.
+   */
+  message (req) {
+    if (!this.__iframe) {
+      return Promise.reject({ error: 'Vault not initialized.' })
+    }
+
+    return new Promise(function (resolve, reject) {
+      let id = 'callback-' + this.__callback_counter++
+      this.__receivers[id] = [resolve, reject]
+
+      req.callback = id
+      this.__vault.postMessage(req, '*')
+    }.bind(this))
+  }
+
+
+  /**
+   * Event handler for incoming messages from vault.
+   */
+  __on_message (event) {
+      // Ignore messages not from vault
+      if (event.source !== this.__vault) return
+
+      // If there's a receiver setup for this message, handle it.
+      if (event.data.callback && this.__receivers[event.data.callback]) {
+        let receiver = this.__receivers[event.data.callback]
+        delete this.__receivers[event.data.callback]
+
+        // Call receiver promise reject
+        if ('error' in event.data) return receiver[1](event.data.error)
+
+        // Call receiver promise resolve
         return receiver[0](event.data.result)
       }
 
-      return receiver[0](event.data)
-    }
-  }
-}
+      if ('ready' in event.data) {
+        console.info('VAULT-API: processing vault ready message.')
+        return this.message({version: null})
+          .then(function (r) {
+            this.version = r
+            return this.message({config: null})
+          }.bind(this))
+          .then(function (r) {
+            this.config = r
+            return this.message({isSignedIn: null})
+          }.bind(this))
+          .then(function (r) {
+            this.isSignedIn = r
 
-/**
- * Internal function, invoked when vault asks us to redirect for signin/signup.
- */
-function launch(opts) {
-  let vaultURL = opts.vaultURL
+            //   If we have a magiccookie from a previous session, then retrieve
+            // it, and attempt an automatic signin, we can presume we've already
+            // been granted cookie access from a previous session.
+            let magiccookie = window.localStorage.getItem('zippie-vault-cookie')
+            if (magiccookie) {
+              return this.signin(true)
+                .then(function () {
+                  return this.message({isSignedIn: null})
+                    .then(function (r) {
+                      this.isSignedIn = r
+                      return this.__onSetupReady()
+                    }.bind(this))
+                }.bind(this))
+            }
 
-  delete opts.vaultURL
-
-  // If no callback is defined, then after signup return here.
-  if(opts.launch === undefined) {
-    opts.launch = window.location.href
-  }
-
-  // Build vault parameter string.
-  let paramstr = ''
-  Object.keys(opts).map(k => {
-    paramstr += (paramstr.length === 0 ? '' : ';') + k + '=' + opts[k]
-  })
-
-  console.log('API: redirecting to ' + vaultURL + '#?' + paramstr)
-  window.location = vaultURL + '#?' + paramstr
-}
-
-/**
- * Send a message to Zippie Vault
- * @param {Object} message Dictionary with the message to
- * @return {Promise} that resolves with the response from the vault
- */
-export function message(message) {
-  return new Promise(function(resolve, reject) {
-    let id = 'callback-' + _counter++
-
-    receivers[id] = [resolve, reject]
-    message.callback = id
-
-    // XXX this should be to our known origin for when it claims it's ready
-    vault.postMessage(message, '*')
-  })
-}
-
-/** 
- * Init the Zippie Vault communication
- * @return {Promise} that resolves when the vault is ready for messaging
-*/
-export function init(opts) {
-  opts = opts || {};
-
-  // Variables for parameter processing
-  let params = parseOpts(window.location)
-
-  // Strip params from URI fragment part
-  if (window.location.hash.indexOf('?') !== -1) {
-    window.location.hash = window.location.hash.slice(0, window.location.hash.indexOf('?'))
-  }
-
-  // DApp IPC Mode, running in an IFrame inside the vault
-  // XXX: maybe we should validate that we are talking to the actual vault
-  if('ipc-mode' in opts)
-  {
-    console.log('API: setting parent window as vault instance')
-
-    vault = parent
-    vaultOpts = opts
-
-    return new Promise(
-      function (resolve, reject) {
-        vaultReady = resolve
-        vaultNotReady = reject
-
-        window.addEventListener('message', onIncomingMessage)
-
-        return resolve()
+            this.isSignedIn = false
+            return this.__onSetupReady()
+          }.bind(this))
       }
-    )
+
+      console.warn('VAULT-API: unhandled vault message event:', event)
   }
 
-  // If no vault URI provided, auto-detect from domain check.
-  if (!('vaultURL' in opts)) {
-    opts.vaultURL = 'https://vault.zippie.org'
 
-    if (window.location.href.indexOf('dev.zippie.org') !== -1) {
-      opts.vaultURL = 'https://vault.dev.zippie.org'
-    } else if (window.location.href.indexOf('testing.zippie.org') !== -1) {
-      opts.vaultURL = 'https://vault.testing.zippie.org'
-    }
-  }
+  /**
+   * Parse hash query parameters into an object.
+   */
+  __parse_opts (uri) {
+    let parser = document.createElement('a')
+    parser.href = uri
 
-  if (params['zippie-vault'] !== undefined) {
-    opts.vaultURL = params['zippie-vault']
-  }
+    let hash = parser.hash
+    let paramstr = hash.split('?')[1] || ''
+    hash = hash.split('?')[0]
 
-  // XXX: Implement per-dapp vault access token and cookie, then dapps can
-  // cache in local storage their access token making this redirect only
-  // required on first run.
+    let params = {}
 
-  // If we have no vault "magic" cookie, we have to signin, so launch vault.
-  if (params['vault-cookie'] === undefined) {
-    return Promise.reject(launch(opts))
-  }
-
-  opts.vaultURL = opts.vaultURL + '#?magiccookie=' + params['vault-cookie']
-
-  // Create invisible, nested vault iframe.
-  return new Promise(
-    function (resolve, reject) {
-      vaultOpts = opts
-      vaultReady = resolve
-      vaultNotReady = reject
-
-      window.addEventListener('message', onIncomingMessage)
-
-      var iframe = document.createElement('iframe')
-      iframe.style.display = 'none'
-
-      iframe.sandbox += ' allow-storage-access-by-user-activation'
-      iframe.sandbox += ' allow-same-origin'
-      iframe.sandbox += ' allow-scripts'
-
-      iframe.src = opts.vaultURL
-
-      document.body.appendChild(iframe)
-      vault = iframe.contentWindow
-
-      console.log('API: Launched plainly, enclave built and waiting for ready signal.')
-    })
-}
-
-export function version() {
-  return message({version: null})
-}
-
-export function config() {
-  return message({config: null})
-}
-
-export function enrollments() {
-  return message({enrollments: null})
-}
-
-export function isCardValid(cardInfo) {
-  return message({'cardinfo': cardInfo})
-    .then(r => {
-      return Promise.resolve(r.result !== null)
-    })
-}
-
-/**
- * Return vault internal card management dapp uri
- * @return {String} of constructed resource uri
- */
-export function getCardEnrollUri(path) {
-  path = path || ''
-  let baseuri = 'https://vault.zippie.org/#/'
-  if (window.location.href.indexOf('dev.zippie.org') !== -1) {
-    baseuri = 'https://vault.dev.zippie.org/#/'
-  } else if (window.location.href.indexOf('testing.zippie.org') !== -1) {
-    baseuri = 'https://vault.testing.zippie.org/#/'
-  } else if (vaultOpts.vaultURL) {
-    baseuri = vaultOpts.vaultURL
-  }
-
-  // Strip out any unwanted  parameters
-  baseuri = baseuri.split('#')[0]
-
-  return baseuri + '#?card=' + path
-}
-
-/**
- * Return users preferred wallet uri for resource
- * @return {String} of constructed resource uri
- */
-export function getWalletUri(path) {
-  path = path || ''
-  let baseuri = 'https://my.zippie.org/#/'
-  if (window.location.href.indexOf('dev.zippie.org') !== -1) {
-    baseuri = 'https://my.dev.zippie.org/#/'
-  } else if (window.location.href.indexOf('testing.zippie.org') !== -1) {
-    baseuri = 'https://my.testing.zippie.org/#/'
-  }
-  return baseuri + (path[0] === '/' ? path.slice(1) : path)
-}
-
-/**
- * Create a Zippie Signin button.
- * @return {Button} that when click signs the user in using Zippie
- */
-export function createButton() {
-  // XXX: Hand off button management to Dapp, so they can place it where they
-  // please. Also need to manage state visible, not visible, etc. properly.
-  var button = document.createElement('button')
-  button.id = 'zippie-btn'
-  button.style = 'margin: 0; padding: 0; border: none;'
-  button.innerHTML = 'Zippie Signin'
-
-  button.onclick = function () {
-    console.log('API: Signing in with Zippie')
-
-    message({'login': null})
-    .then(
-      result => {
-        button.style.display = 'none'
-      },
-      error => {
+    let p = paramstr.split(';')
+    if (p[0] !== '') {
+      for (let i = 0; i < p.length; i++) {
+        let parts = p[i].split('=')
+        params[parts[0]] = parts[1]
       }
-    )    
-  }
+    }
 
-  return button
+    return params
+  }
 }
 
-export default {parseOpts, message, init, version, config, enrollments, isCardValid, getCardEnrollUri, getWalletUri, createButton}
