@@ -125,6 +125,8 @@ export default class Vault {
    * correctly with Safari browsers that have ITP 2.0
    */
   signin (noLogin) {
+    if (this.isSignedIn) return Promise.resolve()
+
     let promise
     if (noLogin) {
       promise = new Promise(function (resolve, reject) { resolve() })
