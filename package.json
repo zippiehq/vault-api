@@ -1,6 +1,6 @@
 {
   "name": "@zippie/vault-api",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Client API for Zippie Vault",
   "main": "src/index.js",
   "author": "Zippie Ltd.",
@@ -22,6 +22,6 @@
     "script-loader": "^0.7.2",
     "webpack": "^4.0.1",
     "webpack-cli": "^3.1.2",
-    "webpack-dev-server": "^3.1.9"
+    "webpack-dev-server": ">=3.1.11"
   }
 }
