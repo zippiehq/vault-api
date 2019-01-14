@@ -62,7 +62,7 @@ export function walletInit(vault, apiUrl) {
  * @param {Object} vault Initialised Zippie Vault
  * @param {String} tokenAddr Token Contract Address
  */
-export function getAddressForToken(vault, tokenAddr) {
+export function getAccountForToken(vault, tokenAddr) {
     return messageWallet(vault, 'getAccountForToken', tokenAddr)
 }
 
@@ -83,14 +83,14 @@ export function getPassportImage(vault) {
 }
 
 /**
- * Create a Blank Check for a specified tokenr
+ * Create a Payment Link for a specified token
  * @param {Object} vault  Initialised Zippie Vault
  * @param {String} tokenAddress
  * @param {Number} amount 
  * @param {String} message 
  */
-export function createBlankCheck(vault, tokenAddress, amount, message) {
-  return messageWallet(vault, 'createBlankCheque', {tokenAddress, amount, message})
+export function createPaymentLink(vault, tokenAddress, amount, message) {
+  return messageWallet(vault, 'createPaymentLink', {tokenAddress, amount, message})
 }
 
 /**
@@ -103,21 +103,22 @@ export function getTokenBalance(vault, tokenAddr) {
 }
 
 /**
- * Returns information about a Blank Check
+ * Returns information about a Payment Link
  * @param {Object} vault  Initialised Zippie Vault
- * @param {String} hash Blank Check hash information
+ * @param {String} hash Payment Link hash
  */
-export function fetchBlankCheck(vault, hash) {
-    return messageWallet(vault, 'fetchBlankCheck', hash)
+export function getPaymentLink(vault, hash) {
+    return messageWallet(vault, 'getPaymentLink', hash)
+
 }
 
 /**
- * Claims a Blank Check into a wallet account
+ * Claims a Payment Link into a wallet account
  * @param {Object} vault  Initialised Zippie Vault
- * @param {Object} blankCheck Blank Check Info
+ * @param {Object} paymentLink Payment Link Info
  */
-export function claimBlankCheck(vault, blankCheck) {
-    return messageWallet(vault, 'claimBlankCheck', blankCheck)
+export function claimPaymentLink(vault, paymentLink) {
+    return messageWallet(vault, 'claimPaymentLink', paymentLink)
 }
 
-export default { walletInit, getAddressForToken, getPassportInfo, getPassportImage, createBlankCheck, getTokenBalance, claimBlankCheck }
+export default { walletInit, getAddressForToken, getPassportInfo, getPassportImage, createPaymentLink, getTokenBalance, claimPaymentLink, getPaymentLink }

@@ -76,31 +76,33 @@ vault.init(opts).then(
 
       testLog('Test Wallet Call')
       
+
       wallet.getPassportInfo(vault).then((result) => {
         testLog('Get Passport Info Return')
         testLog('passport info: ' +JSON.stringify(result))
         })
 
-      wallet.fetchBlankCheck(vault, 'c2b498e9df88554ed458054b10f355d96ac4a2a71b624ab6c6f5ee7e286894e6,bce700bc66f0958d9ab0249a701009b6ec9b9dc939fdf9450fa56ccf5fbf1d1c').then((result) => {
-        testLog('Blank Check ' + JSON.stringify(result))
-
-        wallet.claimBlankCheck(vault, result).then((claim) => {
-          testLog('Claim Check ' + JSON.stringify(claim))
-        })
-      })
 
       wallet.getAddressForToken(vault, '0x374FaBa19192a123Fbb0c3990e3EeDcFeeaad42A').then((result) => {
           testLog('ZIPT address: ' + JSON.stringify(result))
 
           wallet.getTokenBalance(vault, '0x374FaBa19192a123Fbb0c3990e3EeDcFeeaad42A').then((result) => {
             testLog('MultisigInfo ' + JSON.stringify(result))
+
+            wallet.getPaymentLink(vault, 'd2916cdf34344b4198c374e4aaeed9797caaa18366112ffbf20dcd80edb46224,428ab13acbad47c8bd648d0f31ff90aa286fe6687fd5c604a4b699184cedfb3d').then((result) => {
+              testLog('Blank Check ' + JSON.stringify(result))
+      
+              wallet.claimPaymentLink(vault, result.blankCheckData).then((claim) => {
+                testLog('Claim Check ' + JSON.stringify(claim))
+              })
+            })
           })
       })
-      
+
       wallet.getAddressForToken(vault, '0xd0A1E359811322d97991E03f863a0C30C2cF029C').then((result) => {
         testLog('WETH address ' + JSON.stringify(result))
       })
-      
+
     })
   },
   error => {
