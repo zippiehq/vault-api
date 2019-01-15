@@ -60,10 +60,10 @@ export default class Vault {
     if (!opts.vault_uri) {
       opts.vault_uri = 'https://vault.zippie.org'
 
-      if (window.location.host.indexOf('dev.zippie.org') !== -1) {
+      if (window.location.host.split('.').indexOf('dev') !== -1) {
         opts.vault_uri = 'https://vault.dev.zippie.org'
       } else
-      if (window.location.host.indexOf('testing.zippie.org') !== -1) {
+      if (window.location.host.split('.').indexOf('testing') !== -1) {
         opts.vault_uri = 'https://vault.testing.zippie.org'
       }
     }
@@ -80,9 +80,9 @@ export default class Vault {
     }
 
     // Add vault enclave iframe to DOM
-    this.__opts = opts
-
     document.body.appendChild(iframe)
+
+    this.__opts = opts
     this.__iframe = iframe
     this.__vault = iframe.contentWindow
   }
@@ -93,26 +93,47 @@ export default class Vault {
    * if we have one available. Resolves when enclave is ready for commands.
    */
   setup () {
+    // Don't allow setup to be called multiple times.
+    if (this.__onSetupReady !== undefined) return Promise.resolve()
+
+    console.info('VAULT-API: Setting up Zippie Vault enclave.')
     return new Promise(function (resolve, reject) {
-      // Setup incoming message handler.
-      window.addEventListener('message', this.__on_message.bind(this))
+      if ('ipc-mode' in this.__opts) {
+        console.info('VAULT-API: Running in IPC mode.')
+        return resolve()
+      }
 
-      if ('ipc-mode' in this.__opts) return resolve()
-
-      this.__onSetupReady = resolve
-      this.__onSetupError = reject
-
+      //   Get magic vault cookie@ by whatever means necessary, if provided via
+      // query parameters, then save /new/ value to local storage.
       let magiccookie = window.localStorage.getItem('zippie-vault-cookie')
       if (this.__params['vault-cookie'] !== undefined) {
         magiccookie = this.__params['vault-cookie']
         window.localStorage.setItem('zippie-vault-cookie', magiccookie)
       }
 
+      //   If no magic cookie was discovered redirect to vault in root mode,
+      // to pick up a new magic cookie, or require user sign up.
+      if (magiccookie === null) {
+        console.warn('VAULT-API: No vault cookie provided, redirecting to vault.')
+        window.location = this.__opts.vault_uri +
+          '#?launch=' + window.location + ';inhibit-signup'
+        return reject()
+      }
+
+      // Setup incoming message handler.
+      this.__on_message = this.__on_message.bind(this)
+      window.addEventListener('message', this.__on_message)
+
+      //   We have a magic cookie, which means we should have an identity
+      // initialize vault with our cookie.
       if (magiccookie !== null) {
+        console.info('VAULT-API: Found magic cookie:', magiccookie)
         this.__iframe.src = this.__opts.vault_uri + '#?magiccookie=' + magiccookie
-      } else {
-        this.__iframe.src = this.__opts.vault_uri
       } 
+
+      // Setup async response handlers for when we hear "ready" from vault.
+      this.__onSetupReady = resolve
+      this.__onSetupError = reject
 
       console.info('VAULT-API: Loading vault from URI:', this.__iframe.src)
     }.bind(this))
@@ -127,52 +148,49 @@ export default class Vault {
   signin (noLogin) {
     if (this.isSignedIn) return Promise.resolve()
 
-    let promise
-    if (noLogin) {
-      promise = new Promise(function (resolve, reject) { resolve() })
-    } else {
-      promise = this.message({login: null})
+    console.info('VAULT-API: Attempting to signin.')
+
+    return new Promise(function (resolve, reject) {
+      if (noLogin) return resolve()
+
+      //   Send 'login' message for ITP support.
+      this.message({login: null})
         .then(function (r) {
           console.info('VAULT-API: Vault reports ITP access granted.')
 
+          this.__onSetupReady = resolve
+          this.__onSetupError = reject
+
+          // XXX - https://bugs.webkit.org/show_bug.cgi?id=188783
+          //   This should cause a "ready" message down the line, which is
+          // picked up by the above promise resolve/reject, which in turn
+          // triggers the continuation of the signin process.
+          this.message({reboot: null})
+
           if ('itp' in this.__params) {
             console.info('VAULT-API: ITP ITP ITP ITP')
-
-            // XXX - https://bugs.webkit.org/show_bug.cgi?id=188783
-            this.message({reboot: null})
-
             delete this.__params['itp']
-            return Promise.reject()
           }
-
-          return Promise.resolve()
         }.bind(this))
-    }
+    }.bind(this))
 
-    return promise
-      .then(function (r) {
-        if (this.isSignedIn === undefined) return Promise.reject('Not setup')
+    .then(function (r) {
+      if (this.isSignedIn === undefined) return Promise.reject('Not setup')
 
-        let magiccookie = window.localStorage.getItem('zippie-vault-cookie')
-        if (magiccookie === undefined) {
-          console.warn('VAULT-API: No vault cookie provided, redirecting to vault.')
-          window.location = this.__opts.vault_uri + '#?launch=' + window.location
-          return
-        }
+      return this.message({signin: null})
+    }.bind(this))
 
-        return this.message({signin: null})
-      }.bind(this))
-      .then(function (r) {
-        if (r && 'error' in r && 'launch' in r) {
-          window.location = r.launch + '#?launch=' + window.location
-          return
-        }
-      })
-      .catch(function (e) {
-        if (e !== 'ITP_REQUEST_FAILURE') return Promise.reject()
-        console.warn('VAULT-API: Vault reported ITP request failure, redirecting to vault for authorization.')
-        window.location = this.__opts.vault_uri + '#?launch=' + window.location + ';itp'
-      }.bind(this))
+    .then(function (r) {
+      if (r && 'error' in r && 'launch' in r) {
+        window.location = r.launch + '#?launch=' + window.location
+      }
+    })
+
+    .catch(function (e) {
+      if (e !== 'ITP_REQUEST_FAILURE') return Promise.reject()
+      console.warn('VAULT-API: Vault reported ITP request failure, redirecting to vault for authorization.')
+      window.location = this.__opts.vault_uri + '#?launch=' + window.location + ';itp'
+    }.bind(this))
   }
 
 
@@ -202,6 +220,8 @@ export default class Vault {
       // Ignore messages not from vault
       if (event.source !== this.__vault) return
 
+      console.info('VAULT-API: Received message:', event.data)
+
       // If there's a receiver setup for this message, handle it.
       if (event.data.callback && this.__receivers[event.data.callback]) {
         let receiver = this.__receivers[event.data.callback]
@@ -216,18 +236,11 @@ export default class Vault {
 
       if ('login' in event.data || 'ready' in event.data) {
         console.info('VAULT-API: processing vault login/ready message.')
-        return this.message({version: null})
-          .then(function (r) {
-            this.version = r
-            return this.message({config: null})
-          }.bind(this))
-          .then(function (r) {
-            this.config = r
-            return this.message({isSignedIn: null})
-          }.bind(this))
-          .then(function (r) {
-            this.isSignedIn = r
 
+        this.__get_vault_attr('version')()
+          .then(this.__get_vault_attr('config'))
+          .then(this.__get_vault_attr('isSignedIn'))
+          .then(function () {
             //   If we have a magiccookie from a previous session, then retrieve
             // it, and attempt an automatic signin, we can presume we've already
             // been granted cookie access from a previous session.
@@ -246,6 +259,8 @@ export default class Vault {
             this.isSignedIn = false
             return this.__onSetupReady()
           }.bind(this))
+
+        return
       }
 
       console.warn('VAULT-API: unhandled vault message event:', event)
@@ -274,6 +289,19 @@ export default class Vault {
     }
 
     return params
+  }
+
+
+  /**
+   *   Send vault message to request a vault, and store value in corrosponding
+   * instance attribute.
+   */
+  __get_vault_attr (attr) {
+    return function () {
+      let mesg = {}
+      mesg[attr] = null
+      return this.message(mesg).then(function (r) { this[attr] = r }.bind(this))
+    }.bind(this)
   }
 }
 
