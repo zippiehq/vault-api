@@ -145,10 +145,24 @@ export default class Vault {
    * should be called from an interactive user component, like a button to work
    * correctly with Safari browsers that have ITP 2.0
    */
-  signin (noLogin) {
+  signin (opts, noLogin) {
     if (this.isSignedIn) return Promise.resolve()
 
+    this.__signin_opts = opts || {}
     console.info('VAULT-API: Attempting to signin.')
+
+    let magiccookie = window.localStorage.getItem('zippie-vault-cookie')
+    if (!magiccookie) {
+      this.__signin_opts.launch = this.__signin_opts.launch || window.location.href
+      let paramstr = ''
+      Object.keys(this.__signin_opts).map(k => {
+        paramstr += (paramstr.length === 0 ? '' : ';') + k + '=' + this.__signin_opts[k]
+      })
+
+      console.info('VAULT-API: Redirecting to:', this.__opts.vault_uri + '#?' + paramstr)
+      window.location = this.__opts.vault_uri + '#?' + paramstr
+      return Promise.resolve()
+    }
 
     return new Promise(function (resolve, reject) {
       if (noLogin) return resolve()
@@ -177,7 +191,7 @@ export default class Vault {
     .then(function (r) {
       if (this.isSignedIn === undefined) return Promise.reject('Not setup')
 
-      return this.message({signin: null})
+      return this.message({signin: this.__signin_opts})
     }.bind(this))
 
     .then(function (r) {
@@ -246,7 +260,7 @@ export default class Vault {
             // been granted cookie access from a previous session.
             let magiccookie = window.localStorage.getItem('zippie-vault-cookie')
             if ('ready' in event.data && magiccookie && !this.__params.itp) {
-              return this.signin(true)
+              return this.signin(this.__signin_opts, true)
                 .then(function () {
                   return this.message({isSignedIn: null})
                     .then(function (r) {
