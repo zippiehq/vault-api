@@ -46,7 +46,7 @@ npm run example
 
 ### Imports
 ```javascript
-import vault from 'vault-api';
+import Vault from '@zippie/vault-api';
 import { keyInfo, sign, encrypt, decrypt } from './secp256k1.js'
 import * as shajs from 'sha.js';
 ```
@@ -55,14 +55,17 @@ import * as shajs from 'sha.js';
 The init call is the entry point to the zippie vault, this call will check for an existing vault service worker and redirect the user to onboarding if required
 
 ```javascript
-vault.init().then(
+const vault = new Vault({vault_uri: 'https://vault.dev.zippie.org' })
+vault.setup()
+.then(vault.signin)
+.then(
   result => {
-    console.log("Init Result: " + result);
-  },
+    console.log("Zippie Vault Ready & Signed In");
+  })
+.catch(
   error => {
-    console.log("Error: " + error);
-  }
-);
+    console.error("Init error:", error)
+  })
 ```
 
 ### Key Info
