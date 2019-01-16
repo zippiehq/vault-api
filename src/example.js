@@ -17,6 +17,11 @@ function testLog(message)
 
 testLog('--- Zippie Vault-API Examples ---')
 
+const WETH_ADDRESS = "0xd0A1E359811322d97991E03f863a0C30C2cF029C"
+const ZIPT_ADDRESS = "0x374FaBa19192a123Fbb0c3990e3EeDcFeeaad42A"
+const SNOUT_ADDRESS = "0x236425d1CD5dc250AdAdd1405871f1f285347F01"
+const FANT_ADDRESS = "0x5A32259f5661207935d031C9d5a59571F70B9252"
+
 testLog('--- Example #1: Init ---')
 
 var opts = {vaultURL: constants.ZippieVaultURL}
@@ -82,28 +87,35 @@ vault.init(opts).then(
         testLog('passport info: ' +JSON.stringify(result))
         })
 
-
-      wallet.getAddressForToken(vault, '0x374FaBa19192a123Fbb0c3990e3EeDcFeeaad42A').then((result) => {
+      wallet.getAccountForToken(vault, ZIPT_ADDRESS).then((result) => {
           testLog('ZIPT address: ' + JSON.stringify(result))
 
-          wallet.getTokenBalance(vault, '0x374FaBa19192a123Fbb0c3990e3EeDcFeeaad42A').then((result) => {
+          wallet.getTokenBalance(vault, ZIPT_ADDRESS).then((result) => {
             testLog('MultisigInfo ' + JSON.stringify(result))
 
-            wallet.getPaymentLink(vault, 'd2916cdf34344b4198c374e4aaeed9797caaa18366112ffbf20dcd80edb46224,428ab13acbad47c8bd648d0f31ff90aa286fe6687fd5c604a4b699184cedfb3d').then((result) => {
+
+            wallet.getPaymentInfo(vault, 'd2916cdf34344b4198c374e4aaeed9797caaa18366112ffbf20dcd80edb46224,428ab13acbad47c8bd648d0f31ff90aa286fe6687fd5c604a4b699184cedfb3d').then((result) => {
               testLog('Blank Check ' + JSON.stringify(result))
       
-              wallet.claimPaymentLink(vault, result.blankCheckData).then((claim) => {
+              wallet.claimPayment(vault, result.blankCheckData).then((claim) => {
                 testLog('Claim Check ' + JSON.stringify(claim))
               })
+            })
+
+            wallet.createPaymentLink(vault, ZIPT_ADDRESS, 100, 'test from api').then((hash) => {
+              testLog('create payment link' + JSON.stringify(hash))
             })
           })
       })
 
-      wallet.getAddressForToken(vault, '0xd0A1E359811322d97991E03f863a0C30C2cF029C').then((result) => {
-        testLog('WETH address ' + JSON.stringify(result))
-      })
+      wallet.createAccountForToken(vault, FANT_ADDRESS).then((account) => {
+        testLog('create Account ' + JSON.stringify(account))
 
-    })
+        wallet.createPaymentLink(vault, FANT_ADDRESS, 100, 'test from api').then((hash) => {
+          testLog('create payment link' + JSON.stringify(hash))
+        })
+      })
+    })   
   },
   error => {
     testLog("encountered error: " + error);

@@ -107,8 +107,8 @@ export function getTokenBalance(vault, tokenAddr) {
  * @param {Object} vault  Initialised Zippie Vault
  * @param {String} hash Payment Link hash
  */
-export function getPaymentLink(vault, hash) {
-    return messageWallet(vault, 'getPaymentLink', hash)
+export function getPaymentInfo(vault, hash) {
+    return messageWallet(vault, 'getPaymentInfo', hash)
 
 }
 
@@ -117,8 +117,27 @@ export function getPaymentLink(vault, hash) {
  * @param {Object} vault  Initialised Zippie Vault
  * @param {Object} paymentLink Payment Link Info
  */
-export function claimPaymentLink(vault, paymentLink) {
-    return messageWallet(vault, 'claimPaymentLink', paymentLink)
+export function claimPayment(vault, paymentInfo) {
+    return messageWallet(vault, 'claimPayment', paymentInfo)
 }
 
-export default { walletInit, getAddressForToken, getPassportInfo, getPassportImage, createPaymentLink, getTokenBalance, claimPaymentLink, getPaymentLink }
+/**
+ * Create a whitelisted multisig account for a particular Token
+ * @param {Object} vault Initialised Zippie Vault
+ * @param {String} tokenAddress Contract address for Token
+ */
+export function createAccountForToken(vault, tokenAddress) {
+    return messageWallet(vault, 'createAccountForToken', tokenAddress)
+}
+
+export default { 
+    walletInit, 
+    getAccountForToken,
+    createAccountForToken, 
+    getPassportInfo, 
+    getPassportImage, 
+    createPaymentLink, 
+    getTokenBalance, 
+    claimPayment, 
+    getPaymentInfo 
+}
