@@ -103,7 +103,7 @@ export default class Vault {
         return resolve()
       }
 
-      //   Get magic vault cookie@ by whatever means necessary, if provided via
+      //   Get magic vault cookie by whatever means necessary, if provided via
       // query parameters, then save /new/ value to local storage.
       let magiccookie = window.localStorage.getItem('zippie-vault-cookie')
       if (this.__params['vault-cookie'] !== undefined) {
@@ -111,9 +111,11 @@ export default class Vault {
         window.localStorage.setItem('zippie-vault-cookie', magiccookie)
       }
 
+      if (magiccookie === '') magiccookie = null
+
       //   If no magic cookie was discovered redirect to vault in root mode,
       // to pick up a new magic cookie, or require user sign up.
-      if (magiccookie === null) {
+      if (!this.__params['inhibit-signup'] && !magiccookie) {
         console.warn('VAULT-API: No vault cookie provided, redirecting to vault.')
         window.location = this.__opts.vault_uri +
           '#?launch=' + window.location + ';inhibit-signup'
@@ -129,7 +131,9 @@ export default class Vault {
       if (magiccookie !== null) {
         console.info('VAULT-API: Found magic cookie:', magiccookie)
         this.__iframe.src = this.__opts.vault_uri + '#?magiccookie=' + magiccookie
-      } 
+      }  else {
+        this.__iframe.src = this.__opts.vault_uri
+      }
 
       // Setup async response handlers for when we hear "ready" from vault.
       this.__onSetupReady = resolve
@@ -151,17 +155,20 @@ export default class Vault {
     this.__signin_opts = opts || {}
     console.info('VAULT-API: Attempting to signin.')
 
+    //   If we've been launched with inhibit-signup specified, and vault reports
+    // no identity (no magiccookie set). Initiate signup process.
     let magiccookie = window.localStorage.getItem('zippie-vault-cookie')
-    if (!magiccookie) {
+    if (this.__params['inhibit-signup'] && !magiccookie) {
       this.__signin_opts.launch = this.__signin_opts.launch || window.location.href
       let paramstr = ''
-      Object.keys(this.__signin_opts).map(k => {
-        paramstr += (paramstr.length === 0 ? '' : ';') + k + '=' + this.__signin_opts[k]
+      Object.keys(this.__signin_opts).forEach(k => {
+        paramstr += (paramstr.length === 0 ? '' : ';')
+          + k + '=' + this.__signin_opts[k]
       })
 
       console.info('VAULT-API: Redirecting to:', this.__opts.vault_uri + '#?' + paramstr)
       window.location = this.__opts.vault_uri + '#?' + paramstr
-      return Promise.resolve()
+      return Promise.reject()
     }
 
     return new Promise(function (resolve, reject) {
@@ -195,13 +202,21 @@ export default class Vault {
     }.bind(this))
 
     .then(function (r) {
-      if (r && 'error' in r && 'launch' in r) {
-        window.location = r.launch + '#?launch=' + window.location
+      if (r && 'error' in r && 'launch' in r && !this.__signin_opts['inhibit-signup']) {
+        this.__signin_opts.launch = this.__signin_opts.launch || window.location.href
+
+        let paramstr = ''
+        Object.keys(this.__signin_opts).forEach(k => {
+          paramstr += (paramstr.length === 0 ? '' : ';')
+            + k + '=' + this.__signin_opts[k]
+        })
+
+        window.location = r.launch + '#?' + paramstr
       }
-    })
+    }.bind(this))
 
     .catch(function (e) {
-      if (e !== 'ITP_REQUEST_FAILURE') return Promise.reject()
+      if (e !== 'ITP_REQUEST_FAILURE') return Promise.reject(e)
       console.warn('VAULT-API: Vault reported ITP request failure, redirecting to vault for authorization.')
       window.location = this.__opts.vault_uri + '#?launch=' + window.location + ';itp'
     }.bind(this))
@@ -259,18 +274,13 @@ export default class Vault {
             // it, and attempt an automatic signin, we can presume we've already
             // been granted cookie access from a previous session.
             let magiccookie = window.localStorage.getItem('zippie-vault-cookie')
-            if ('ready' in event.data && magiccookie && !this.__params.itp) {
+            if ('ready' in event.data && magiccookie) {
               return this.signin(this.__signin_opts, true)
-                .then(function () {
-                  return this.message({isSignedIn: null})
-                    .then(function (r) {
-                      this.isSignedIn = r
-                      return this.__onSetupReady()
-                    }.bind(this))
-                }.bind(this))
+                .then(this.__get_vault_attr('isSignedIn'))
+                .then(this.__onSetupReady)
+                .catch(e => { console.error(e) })
             }
 
-            this.isSignedIn = false
             return this.__onSetupReady()
           }.bind(this))
 
