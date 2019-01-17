@@ -241,6 +241,13 @@ export default class Vault {
     }.bind(this))
   }
 
+  /**
+   *
+   */
+  enrollments () {
+    return this.message({ enrollments: null })
+  }
+
 
   /**
    * Event handler for incoming messages from vault.
