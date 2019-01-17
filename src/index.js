@@ -100,6 +100,15 @@ export default class Vault {
     return new Promise(function (resolve, reject) {
       if ('ipc-mode' in this.__opts) {
         console.info('VAULT-API: Running in IPC mode.')
+
+        // Setup async response handlers for when we hear "ready" from vault.
+        this.__onSetupReady = resolve
+        this.__onSetupError = reject
+
+        // Setup incoming message handler.
+        this.__on_message = this.__on_message.bind(this)
+        this.__vault = window.parent
+        window.addEventListener('message', this.__on_message)
         return resolve()
       }
 
