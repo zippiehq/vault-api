@@ -1,15 +1,17 @@
-import * as  vault from '../src/index.js'
+import Vault from '../src/index.js'
+import * as constants from '../src/constants.js'
 
 describe('Vault-API', function () {
-    it('init', function (done) {
-      var opts = {vaultURL: 'https://vault.dev.zippie.org'}
-      vault.init(opts).then(() => {
-        done();
+    it('setup', function (done) {
+      window.vault.setup().then(() => {
+        window.vault.signin().then(() => {
+          done();
+        })
       })
     })
  
     it('version', function(done) {
-     vault.version().then((version) => {
+      window.vault.version().then((version) => {
        chai.expect(version).to.be.an('object')
        chai.expect(version).to.have.property('BUILD_VERSION').that.is.a('string')
        chai.expect(version).to.have.property('BUILD_TIMESTAMP').that.is.a('string')
@@ -18,7 +20,7 @@ describe('Vault-API', function () {
     })
 
     it('config', function(done) {
-      vault.config().then((config) => {
+      window.vault.config().then((config) => {
         chai.expect(config).to.be.an('object')
         chai.expect(config).to.have.all.keys('apis', 'apps', 'uri')
         chai.expect(config.apis).to.have.all.keys('fms', 'permastore')
@@ -28,7 +30,7 @@ describe('Vault-API', function () {
     })
 
     it('enrollments', function(done) {
-      vault.enrollments().then((enrollments) => {
+      window.vault.enrollments().then((enrollments) => {
         chai.expect(enrollments).to.be.an('array').that.is.not.empty
         done()
       })
