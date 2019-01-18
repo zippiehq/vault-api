@@ -4,5 +4,5 @@ import * as constants from '../src/constants.js'
 
 mocha.setup('bdd');
 
-var opts = {vault_url: constants.ZippieVaultURL}
+var opts = {vault_uri: constants.ZippieVaultURL}
 window.vault = new Vault(opts)
