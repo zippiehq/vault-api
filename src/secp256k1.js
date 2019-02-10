@@ -4,9 +4,17 @@
  * @param {String} derive the particular BIP32 derivation, see https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki
  * @return {Promise} where resolve gets the public key and public extended key in a dictionary
 */
+import shajs from 'sha.js'
+import * as appcache from './appcache'
 
-export function keyInfo(vault, derive) {     
-  return vault.message({'secp256k1KeyInfo' : { key: { derive: derive } }})
+export function keyInfo(vault, derive) {
+  const cacheId =
+    shajs('sha256').update('secp256k1KeyInfo-' + derive).digest().toString('hex')
+  return appcache.get(
+    vault,
+    cacheId,
+    {'secp256k1KeyInfo' : { key: { derive: derive } }}
+  )
 }
 
 /** 
