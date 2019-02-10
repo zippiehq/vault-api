@@ -1,6 +1,6 @@
 {
   "name": "@zippie/vault-api",
-  "version": "1.0.12",
+  "version": "1.0.13",
   "description": "Client API for Zippie Vault",
   "main": "src/index.js",
   "author": "Zippie Ltd.",
@@ -13,7 +13,9 @@
     "test": "webpack-dev-server",
     "example": "webpack-dev-server --config webpack.example.js"
   },
-  "dependencies": {},
+  "dependencies": {
+    "sha.js": "^2.4.11"
+  },
   "devDependencies": {
     "callbag-html": "^0.1.0",
     "chai": "^4.2.0",
