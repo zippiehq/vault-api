@@ -257,6 +257,22 @@ export default class Vault {
     return this.message({ enrollments: null })
   }
 
+  /**
+   * 
+   * @param {*} event 
+   */
+  getUserData (id) {
+    return this.message({ userdata: { get: { key: id } }})
+  }
+
+  /**
+   * 
+   * @param {*} event 
+   */
+  setUserData (id, value) {
+    return this.message({ userdata: { set: { key: id, value: value }}})
+  }
+
 
   /**
    * Event handler for incoming messages from vault.
