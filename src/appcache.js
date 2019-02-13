@@ -20,19 +20,31 @@
  * SOFTWARE.
  *
  */
+export async function init (vault) {
+  console.info('VAULT-API: VaultAppCache checking device ID...')
+
+  const deviceId = localStorage.getItem('zippie-device-id')
+  const deviceInfo = await vault.getDeviceInfo()
+
+  if (deviceInfo.deviceId !== deviceId) {
+    console.info('VAULT-API: VaultAppCache device ID mismatch, clearing...')
+    clear()
+    localStorage.setItem('zippie-device-id', deviceInfo.deviceId)
+  }
+}
 
 export function get (vault, key, req) {
   key = 'zippie-appcache-' + key
 
   let value = localStorage.getItem(key)
   if (value) {
-    console.info('VAULT-API: Caching pulled value for message:', req)
+    console.info('VAULT-API: VaultAppCache pulled value for message:', req)
     return Promise.resolve(JSON.parse(value))
   }
 
   return vault.message(req)
     .then(r => {
-      console.info('VAULT-API: Caching value for message:', req)
+      console.info('VAULT-API: VaultAppCache caching value for message:', req)
       localStorage.setItem(key, JSON.stringify(r))
       return r
     })
