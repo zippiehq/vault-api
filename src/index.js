@@ -19,6 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
 */
+import * as appcache from './appcache'
 
 /**
  * Vault API
@@ -184,7 +185,7 @@ export default class Vault {
       if (noLogin) return resolve()
 
       //   Send 'login' message for ITP support.
-      this.message({login: null})
+      return this.message({login: null})
         .then(function (r) {
           console.info('VAULT-API: Vault reports ITP access granted.')
 
@@ -201,6 +202,11 @@ export default class Vault {
             console.info('VAULT-API: ITP ITP ITP ITP')
             delete this.__params['itp']
           }
+        }.bind(this))
+        .catch(function (e) {
+          if (e !== 'ITP_REQUEST_FAILURE') return Promise.reject(e)
+          console.warn('VAULT-API: Vault reported ITP request failure, redirecting to vault for authorization.')
+          window.location = this.__opts.vault_uri + '#?launch=' + window.location + ';itp'    
         }.bind(this))
     }.bind(this))
 
@@ -222,6 +228,8 @@ export default class Vault {
 
         window.location = r.launch + '#?' + paramstr
       }
+
+      return appcache.init(this)
     }.bind(this))
 
     .catch(function (e) {
@@ -259,6 +267,14 @@ export default class Vault {
 
   /**
    * 
+   * @param {*} id 
+   */
+  getDeviceInfo () {
+    return this.message({ getDeviceInfo: null })
+  }
+
+  /**
+   * 
    * @param {*} event 
    */
   getUserData (id) {
@@ -285,6 +301,7 @@ export default class Vault {
 
       // If there's a receiver setup for this message, handle it.
       if (event.data.callback && this.__receivers[event.data.callback]) {
+        console.info('VAULT-API: Invoking message callback.')
         let receiver = this.__receivers[event.data.callback]
         delete this.__receivers[event.data.callback]
 
@@ -301,7 +318,7 @@ export default class Vault {
         this.__get_vault_attr('version')()
           .then(this.__get_vault_attr('config'))
           .then(this.__get_vault_attr('isSignedIn'))
-          .then(function () {
+          .then(async function () {
             //   If we have a magiccookie from a previous session, then retrieve
             // it, and attempt an automatic signin, we can presume we've already
             // been granted cookie access from a previous session.
@@ -309,9 +326,14 @@ export default class Vault {
             if ('ready' in event.data && magiccookie) {
               return this.signin(this.__signin_opts, true)
                 .then(this.__get_vault_attr('isSignedIn'))
+                .then(function () {
+                  if (this.isSignedIn) return appcache.init(this)
+                }.bind(this))
                 .then(this.__onSetupReady)
                 .catch(e => { console.error(e) })
             }
+
+            if (this.isSignedIn) await appcache.init(this)
 
             return this.__onSetupReady()
           }.bind(this))
