@@ -1,7 +1,7 @@
 {
   "name": "@zippie/vault-api",
-  "version": "1.0.13",
-  "description": "Client API for Zippie Vault",
+  "version": "1.0.14",
+  "description": "Zippie Vault Application API",
   "main": "src/index.js",
   "author": "Zippie Ltd.",
   "license": "BSD-3-Clause",
@@ -11,7 +11,8 @@
   },
   "scripts": {
     "test": "webpack-dev-server",
-    "example": "webpack-dev-server --config webpack.example.js"
+    "example": "webpack-dev-server --config webpack.example.js",
+    "doc": "jsdoc --configure .jsdoc.json --verbose"
   },
   "dependencies": {
     "sha.js": "^2.4.11"
@@ -20,8 +21,11 @@
     "callbag-html": "^0.1.0",
     "chai": "^4.2.0",
     "html-webpack-plugin": "^3.2.0",
+    "jsdoc": "^3.5.5",
+    "jsdoc-template": "github:zippiehq/jsdoc-template",
     "mocha": "^5.2.0",
     "script-loader": "^0.7.2",
+    "taffydb": "^2.7.3",
     "webpack": "^4.0.1",
     "webpack-cli": "^3.1.2",
     "webpack-dev-server": ">=3.1.11"
