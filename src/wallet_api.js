@@ -18,13 +18,24 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
-*/
-
+ */
 import * as constants from './constants'
 
 /**
+ * @module wallet
+ * 
+ * @desc
  * Zippie Wallet API
  * Allows interaction between dapps and the Zippie Wallet
+ * 
+ * @example
+ * import * as wallet from '@zippie/vault-api/wallet_api'
+ * 
+ * wallet.walletInit(vault)
+ *  .then(_ => {
+ *    // USE WALLET FUNCTIONS HERE
+ *  })
+ * 
  */
 
 var walletApiUrl = constants.ZippieWalletURL
