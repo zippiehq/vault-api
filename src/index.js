@@ -18,18 +18,40 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
-*/
+ */
 import * as appcache from './appcache'
 import * as ipc from './ipc/'
 
 /**
- * Vault API
+ * Vault API configuration options
+ * 
+ * @typedef {Object} Vault#VaultOpts
+ * 
+ * @property {string} vault_uri Specify custom vault location
+ * @property {boolean} ipc-mode Specify running in IPC service mode only
+ * 
+ */
+
+/**
+ * Class for integrating Zippie platform into an application
+ * 
+ * @class Vault
+ * 
+ * @param {Vault#VaultOpts} opts Vault API configuration. (optional)
+ * 
+ * @returns {Vault} New vault instance
+ * 
+ * @example
+ * const vault = new Vault({vault_uri: 'https://vault.dev.zippie.org'})
+ * vault.setup()
+ *  .then(_ => vault.signin())
+ *  .then(_ => {
+ *    console.info('Vault initialized')
+ *  })
+ *  .catch(e => { console.error(e) })
+ * 
  */
 export default class Vault {
-  /**
-   * opts:
-   *   vault_uri - Zippie vault location
-   */
   constructor (opts) {
     opts = opts || {}
 
@@ -91,8 +113,10 @@ export default class Vault {
 
 
   /**
-   *   Initialize vault enclave by loading in vault source with magiccookie key
+   * Initialize vault enclave by loading in vault source with magiccookie key
    * if we have one available. Resolves when enclave is ready for commands.
+   * 
+   * @method Vault#setup
    */
   async setup () {
     // Don't allow setup to be called multiple times.
@@ -159,9 +183,14 @@ export default class Vault {
 
 
   /**
-   *   When vault is setup correctly, this function initiates a signin process
+   * When vault is setup correctly, this function initiates a signin process
    * should be called from an interactive user component, like a button to work
    * correctly with Safari browsers that have ITP 2.0
+   * 
+   * @method Vault#signin
+   * 
+   * @param {Object} opts Options to pass to Vault during signin process.
+   * @param {bool} noLogin (internal use only)
    */
   signin (opts, noLogin) {
     if (this.isSignedIn) return Promise.resolve()
@@ -245,8 +274,14 @@ export default class Vault {
 
 
   /**
-   *   Send a request command to vault enclave. Returns a promise that resolves
-   * or rejects depending on the result received back from the enclave.
+   * Send a request to the vault enclave. Returns a promise that resolves
+   * or rejects depending on the received result.
+   * 
+   * @method Vault#message
+   * 
+   * @param {Object} request Message to send
+   * 
+   * @returns {Promise}
    */
   message (req) {
     if (!this.__iframe) {
@@ -263,31 +298,46 @@ export default class Vault {
   }
 
   /**
-   *
+   * Request identity enrollments, this is a list of devices and recovery
+   * methods.
+   * 
+   * @method Vault#enrollments
+   * 
+   * @returns {Array} Users' enrollments
    */
   enrollments () {
     return this.message({ enrollments: null })
   }
 
   /**
+   * Request this devices' identification information.
    * 
-   * @param {*} id 
+   * @method Vault#getDeviceInfo
+   * 
+   * @returns {DeviceInfo} Device information
    */
   getDeviceInfo () {
     return this.message({ getDeviceInfo: null })
   }
 
   /**
+   * Request user data
    * 
-   * @param {*} event 
+   * @method Vault#getUserData
+   * 
+   * @returns {Any} Userdata
    */
   getUserData (id) {
     return this.message({ userdata: { get: { key: id } }})
   }
 
   /**
+   * Assign user data.
    * 
-   * @param {*} event 
+   * @method Vault#setUserData
+   * 
+   * @param {string} id 
+   * @param {Any} value 
    */
   setUserData (id, value) {
     return this.message({ userdata: { set: { key: id, value: value }}})
@@ -296,6 +346,8 @@ export default class Vault {
 
   /**
    * Event handler for incoming messages from vault.
+   * 
+   * @access private
    */
   __on_message (event) {
       // Ignore messages not from vault
@@ -353,6 +405,8 @@ export default class Vault {
 
   /**
    * Parse hash query parameters into an object.
+   * 
+   * @access private
    */
   __parse_opts (uri) {
     let parser = document.createElement('a')
@@ -379,6 +433,8 @@ export default class Vault {
   /**
    *   Send vault message to request a vault, and store value in corrosponding
    * instance attribute.
+   * 
+   * @access private
    */
   __get_vault_attr (attr) {
     return function () {
