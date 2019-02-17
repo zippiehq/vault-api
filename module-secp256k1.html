@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>
+      Zippie Vault API Reference
+  </title>
+
+  <link href="https://www.braintreepayments.com/images/favicon-ccda0b14.png" rel="icon" type="image/png">
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.7.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+
+  <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+  <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+  
+
+  
+
+  <!-- start Mixpanel -->
+  <script type="text/javascript">(function(e,a){if(!a.__SV){var b=window;try{var c,l,i,j=b.location,g=j.hash;c=function(a,b){return(l=a.match(RegExp(b+"=([^&]*)")))?l[1]:null};g&&c(g,"state")&&(i=JSON.parse(decodeURIComponent(c(g,"state"))),"mpeditor"===i.action&&(b.sessionStorage.setItem("_mpcehash",g),history.replaceState(i.desiredHash||"",e.title,j.pathname+j.search)))}catch(m){}var k,h;window.mixpanel=a;a._i=[];a.init=function(b,c,f){function e(b,a){var c=a.split(".");2==c.length&&(b=b[c[0]],a=c[1]);b[a]=function(){b.push([a].concat(Array.prototype.slice.call(arguments,
+  0)))}}var d=a;"undefined"!==typeof f?d=a[f]=[]:f="mixpanel";d.people=d.people||[];d.toString=function(b){var a="mixpanel";"mixpanel"!==f&&(a+="."+f);b||(a+=" (stub)");return a};d.people.toString=function(){return d.toString(1)+".people (stub)"};k="disable time_event track track_pageview track_links track_forms register register_once alias unregister identify name_tag set_config reset people.set people.set_once people.increment people.append people.union people.track_charge people.clear_charges people.delete_user".split(" ");
+  for(h=0;h<k.length;h++)e(d,k[h]);a._i.push([b,c,f])};a.__SV=1.2;b=e.createElement("script");b.type="text/javascript";b.async=!0;b.src="undefined"!==typeof MIXPANEL_CUSTOM_LIB_URL?MIXPANEL_CUSTOM_LIB_URL:"file:"===e.location.protocol&&"//cdn.mxpnl.com/libs/mixpanel-2-latest.min.js".match(/^\/\//)?"https://cdn.mxpnl.com/libs/mixpanel-2-latest.min.js":"//cdn.mxpnl.com/libs/mixpanel-2-latest.min.js";c=e.getElementsByTagName("script")[0];c.parentNode.insertBefore(b,c)}})(document,window.mixpanel||[]);
+  mixpanel.init("1919205b2da72e4da3b9b6639b444d59");</script>
+  <!-- end Mixpanel -->
+</head>
+
+<body>
+  <svg style="display: none;">
+    <defs>
+      <symbol id="linkIcon" fill="#706d77" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M0 0h24v24H0z" fill="none"/>
+          <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/>
+      </symbol>
+    </defs>
+  </svg>
+
+  <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+  <label for="nav-trigger" class="navicon-button x">
+    <div class="navicon"></div>
+  </label>
+
+  <label for="nav-trigger" class="overlay"></label>
+
+  <div class="top-nav-wrapper">
+    <ul>
+      <li >
+        <a href="index.html">
+          
+            <svg fill="#6D6D6D" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+              <path d="M0 0h24v24H0z" fill="none"/>
+            </svg>
+          
+          
+        </a>
+      </li>
+
+      
+
+    </ul>
+  </div>
+
+  <nav>
+    <h3 class="reference-title">
+      Zippie Vault API Reference
+    </h3>
+
+    
+
+    <h3>Classes</h3><ul><li id="Vault-nav"><a href="Vault.html">Vault</a><ul class='methods'><li data-type="method" id="Vault-enrollments-nav"><a href="Vault.html#enrollments">enrollments</a></li><li data-type="method" id="Vault-getDeviceInfo-nav"><a href="Vault.html#getDeviceInfo">getDeviceInfo</a></li><li data-type="method" id="Vault-getUserData-nav"><a href="Vault.html#getUserData">getUserData</a></li><li data-type="method" id="Vault-message-nav"><a href="Vault.html#message">message</a></li><li data-type="method" id="Vault-setup-nav"><a href="Vault.html#setup">setup</a></li><li data-type="method" id="Vault-setUserData-nav"><a href="Vault.html#setUserData">setUserData</a></li><li data-type="method" id="Vault-signin-nav"><a href="Vault.html#signin">signin</a></li></ul></li></ul><h3>Modules</h3><ul><li id="ipc-nav"><a href="module-ipc.html">ipc</a><ul class='methods'><li data-type="method" id="ipc-createClient-nav"><a href="module-ipc.html#~createClient">createClient</a></li><li data-type="method" id="ipc-createService-nav"><a href="module-ipc.html#~createService">createService</a></li></ul></li><li id="secp256k1-nav"><a href="module-secp256k1.html">secp256k1</a><ul class='methods'><li data-type="method" id="secp256k1-decrypt-nav"><a href="module-secp256k1.html#.decrypt">decrypt</a></li><li data-type="method" id="secp256k1-encrypt-nav"><a href="module-secp256k1.html#.encrypt">encrypt</a></li><li data-type="method" id="secp256k1-keyInfo-nav"><a href="module-secp256k1.html#.keyInfo">keyInfo</a></li><li data-type="method" id="secp256k1-sign-nav"><a href="module-secp256k1.html#.sign">sign</a></li></ul></li><li id="wallet-nav"><a href="module-wallet.html">wallet</a><ul class='methods'><li data-type="method" id="wallet-claimPayment-nav"><a href="module-wallet.html#.claimPayment">claimPayment</a></li><li data-type="method" id="wallet-createAccountForToken-nav"><a href="module-wallet.html#.createAccountForToken">createAccountForToken</a></li><li data-type="method" id="wallet-createPaymentLink-nav"><a href="module-wallet.html#.createPaymentLink">createPaymentLink</a></li><li data-type="method" id="wallet-getAccountForToken-nav"><a href="module-wallet.html#.getAccountForToken">getAccountForToken</a></li><li data-type="method" id="wallet-getPassportImage-nav"><a href="module-wallet.html#.getPassportImage">getPassportImage</a></li><li data-type="method" id="wallet-getPassportInfo-nav"><a href="module-wallet.html#.getPassportInfo">getPassportInfo</a></li><li data-type="method" id="wallet-getPaymentInfo-nav"><a href="module-wallet.html#.getPaymentInfo">getPaymentInfo</a></li><li data-type="method" id="wallet-getTokenBalance-nav"><a href="module-wallet.html#.getTokenBalance">getTokenBalance</a></li><li data-type="method" id="wallet-walletInit-nav"><a href="module-wallet.html#.walletInit">walletInit</a></li><li data-type="method" id="wallet-messageWallet-nav"><a href="module-wallet.html#~messageWallet">messageWallet</a></li></ul></li></ul>
+  </nav>
+
+  <div id="main">
+    
+      <h1 class="page-title">
+        secp256k1
+      </h1>
+    
+
+    
+
+<section>
+  <header>
+    
+      
+  </header>
+
+  <article>
+    <div class="container-overview">
+      
+        
+
+        
+      
+    </div>
+
+    
+
+    
+
+    
+
+     
+
+    
+
+    
+
+    
+      <h3 class="subsection-title">Methods</h3>
+
+      
+        
+
+
+  
+
+  <span class='name-container'>
+    <a class="link-icon" href="#.decrypt">
+      <svg height="20" width="20" style="fill: black;">
+        <use xlink:href="#linkIcon"></use>
+      </svg>
+    </a>
+    <h4 class="name" id=".decrypt">
+      <span class="type-signature">(static) </span>decrypt<span class="signature">(vault, key, output)</span><span class="type-signature"> &rarr; {Promise}</span>
+    </h4>
+  </span>
+
+  
+
+
+
+  <div class="description">
+    <p>Ask vault to encrypt a message</p>
+  </div>
+
+
+
+
+
+
+
+  <h5>Parameters:</h5>
+  
+
+<table class="params">
+  <thead>
+    <tr>
+      
+        <th>Name</th>
+      
+
+      <th>Type</th>
+
+      
+
+      
+
+      <th class="last">Description</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    
+      <tr>
+        
+          <td class="name"><code>vault</code></td>
+        
+
+        <td class="type">
+          
+            
+    <span class="param-type">
+      <a href="Vault.html">Vault</a>
+    </span>
+
+    
+
+
+          
+        </td>
+
+        
+
+        
+
+        <td class="description last">
+          <p>the Vault module</p>
+          
+        </td>
+      </tr>
+
+    
+      <tr>
+        
+          <td class="name"><code>key</code></td>
+        
+
+        <td class="type">
+          
+            
+    <span class="param-type">
+      derive
+    </span>
+
+    
+
+
+          
+        </td>
+
+        
+
+        
+
+        <td class="description last">
+          <p>index</p>
+          
+        </td>
+      </tr>
+
+    
+      <tr>
+        
+          <td class="name"><code>output</code></td>
+        
+
+        <td class="type">
+          
+            
+    <span class="param-type">
+      opts
+    </span>
+
+    
+
+
+          
+        </td>
+
+        
+
+        
+
+        <td class="description last">
+          <p>from secp256k1 encrypt call</p>
+          
+        </td>
+      </tr>
+
+    
+  </tbody>
+</table>
+
+
+
+
+
+<dl class="details">
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source">
+      <ul class="dummy">
+        <li>
+          <a href="secp256k1.js.html">secp256k1.js</a>, <a href="secp256k1.js.html#line113">line 113</a>
+        </li>
+      </ul>
+    </dd>
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <div class="example-container">
+    <a class="link-icon" href="#decrypt-examples">
+      <svg height="20" width="20" style="fill: black;">
+        <use xlink:href="#linkIcon"></use>
+      </svg>
+    </a>
+    <h5 id="decrypt-examples">Example</h5>
+    
+
+  <pre class="prettyprint"><code>import * as vaultSecp256k1 from '@zippie/vault-api/secp256k1'
+
+vaultSecp256k1.decrypt(vault, 'm/0', data)
+  .then(plaintext => console.info(plaintext))</code></pre>
+
+
+  </div>
+
+
+      
+        
+
+
+  
+
+  <span class='name-container'>
+    <a class="link-icon" href="#.encrypt">
+      <svg height="20" width="20" style="fill: black;">
+        <use xlink:href="#linkIcon"></use>
+      </svg>
+    </a>
+    <h4 class="name" id=".encrypt">
+      <span class="type-signature">(static) </span>encrypt<span class="signature">(vault, hex, plain)</span><span class="type-signature"> &rarr; {Promise}</span>
+    </h4>
+  </span>
+
+  
+
+
+
+  <div class="description">
+    <p>Ask vault to encrypt a message</p>
+  </div>
+
+
+
+
+
+
+
+  <h5>Parameters:</h5>
+  
+
+<table class="params">
+  <thead>
+    <tr>
+      
+        <th>Name</th>
+      
+
+      <th>Type</th>
+
+      
+
+      
+
+      <th class="last">Description</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    
+      <tr>
+        
+          <td class="name"><code>vault</code></td>
+        
+
+        <td class="type">
+          
+            
+    <span class="param-type">
+      <a href="Vault.html">Vault</a>
+    </span>
+
+    
+
+
+          
+        </td>
+
+        
+
+        
+
+        <td class="description last">
+          <p>the Vault module</p>
+          
+        </td>
+      </tr>
+
+    
+      <tr>
+        
+          <td class="name"><code>hex</code></td>
+        
+
+        <td class="type">
+          
+            
+    <span class="param-type">
+      pubkey
+    </span>
+
+    
+
+
+          
+        </td>
+
+        
+
+        
+
+        <td class="description last">
+          <p>encoded public key</p>
+          
+        </td>
+      </tr>
+
+    
+      <tr>
+        
+          <td class="name"><code>plain</code></td>
+        
+
+        <td class="type">
+          
+            
+    <span class="param-type">
+      plaintext
+    </span>
+
+    
+
+
+          
+        </td>
+
+        
+
+        
+
+        <td class="description last">
+          <p>text data to encrypt</p>
+          
+        </td>
+      </tr>
+
+    
+  </tbody>
+</table>
+
+
+
+
+
+<dl class="details">
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source">
+      <ul class="dummy">
+        <li>
+          <a href="secp256k1.js.html">secp256k1.js</a>, <a href="secp256k1.js.html#line88">line 88</a>
+        </li>
+      </ul>
+    </dd>
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <div class="example-container">
+    <a class="link-icon" href="#encrypt-examples">
+      <svg height="20" width="20" style="fill: black;">
+        <use xlink:href="#linkIcon"></use>
+      </svg>
+    </a>
+    <h5 id="encrypt-examples">Example</h5>
+    
+
+  <pre class="prettyprint"><code>import * as vaultSecp256k1 from '@zippie/vault-api/secp256k1'
+
+vaultSecp256k1.encrypt(vault, 'm/0', 'test message')
+  .then(mesg => console.info(mesg))</code></pre>
+
+
+  </div>
+
+
+      
+        
+
+
+  
+
+  <span class='name-container'>
+    <a class="link-icon" href="#.keyInfo">
+      <svg height="20" width="20" style="fill: black;">
+        <use xlink:href="#linkIcon"></use>
+      </svg>
+    </a>
+    <h4 class="name" id=".keyInfo">
+      <span class="type-signature">(static) </span>keyInfo<span class="signature">(vault, derive)</span><span class="type-signature"> &rarr; {Promise}</span>
+    </h4>
+  </span>
+
+  
+
+
+
+  <div class="description">
+    <p>Get the public key and extended public key for that particular purpose and derivation</p>
+  </div>
+
+
+
+
+
+
+
+  <h5>Parameters:</h5>
+  
+
+<table class="params">
+  <thead>
+    <tr>
+      
+        <th>Name</th>
+      
+
+      <th>Type</th>
+
+      
+
+      
+
+      <th class="last">Description</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    
+      <tr>
+        
+          <td class="name"><code>vault</code></td>
+        
+
+        <td class="type">
+          
+            
+    <span class="param-type">
+      <a href="Vault.html">Vault</a>
+    </span>
+
+    
+
+
+          
+        </td>
+
+        
+
+        
+
+        <td class="description last">
+          <p>the Vault module</p>
+          
+        </td>
+      </tr>
+
+    
+      <tr>
+        
+          <td class="name"><code>derive</code></td>
+        
+
+        <td class="type">
+          
+            
+    <span class="param-type">
+      string
+    </span>
+
+    
+
+
+          
+        </td>
+
+        
+
+        
+
+        <td class="description last">
+          <p>the particular BIP32 derivation, see https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki</p>
+          
+        </td>
+      </tr>
+
+    
+  </tbody>
+</table>
+
+
+
+
+
+<dl class="details">
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source">
+      <ul class="dummy">
+        <li>
+          <a href="secp256k1.js.html">secp256k1.js</a>, <a href="secp256k1.js.html#line41">line 41</a>
+        </li>
+      </ul>
+    </dd>
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <div class="example-container">
+    <a class="link-icon" href="#keyInfo-examples">
+      <svg height="20" width="20" style="fill: black;">
+        <use xlink:href="#linkIcon"></use>
+      </svg>
+    </a>
+    <h5 id="keyInfo-examples">Example</h5>
+    
+
+  <pre class="prettyprint"><code>import * as vaultSecp256k1 from '@zippie/vault-api/secp256k1'
+
+vaultSecp256k1.keyInfo(vault, 'm/0')
+  .then(keyInfo => console.info(keyInfo))</code></pre>
+
+
+  </div>
+
+
+      
+        
+
+
+  
+
+  <span class='name-container'>
+    <a class="link-icon" href="#.sign">
+      <svg height="20" width="20" style="fill: black;">
+        <use xlink:href="#linkIcon"></use>
+      </svg>
+    </a>
+    <h4 class="name" id=".sign">
+      <span class="type-signature">(static) </span>sign<span class="signature">(vault, derive, hash)</span><span class="type-signature"> &rarr; {Promise}</span>
+    </h4>
+  </span>
+
+  
+
+
+
+  <div class="description">
+    <p>Signs a particular hash with the private for that particular purpose and derivation</p>
+  </div>
+
+
+
+
+
+
+
+  <h5>Parameters:</h5>
+  
+
+<table class="params">
+  <thead>
+    <tr>
+      
+        <th>Name</th>
+      
+
+      <th>Type</th>
+
+      
+
+      
+
+      <th class="last">Description</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    
+      <tr>
+        
+          <td class="name"><code>vault</code></td>
+        
+
+        <td class="type">
+          
+            
+    <span class="param-type">
+      <a href="Vault.html">Vault</a>
+    </span>
+
+    
+
+
+          
+        </td>
+
+        
+
+        
+
+        <td class="description last">
+          <p>the Vault module</p>
+          
+        </td>
+      </tr>
+
+    
+      <tr>
+        
+          <td class="name"><code>derive</code></td>
+        
+
+        <td class="type">
+          
+            
+    <span class="param-type">
+      string
+    </span>
+
+    
+
+
+          
+        </td>
+
+        
+
+        
+
+        <td class="description last">
+          <p>the particular BIP32 derivation, see https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki</p>
+          
+        </td>
+      </tr>
+
+    
+      <tr>
+        
+          <td class="name"><code>hash</code></td>
+        
+
+        <td class="type">
+          
+            
+    <span class="param-type">
+      string
+    </span>
+
+    
+
+
+          
+        </td>
+
+        
+
+        
+
+        <td class="description last">
+          <p>the hash (32-bytes) that should be signed</p>
+          
+        </td>
+      </tr>
+
+    
+  </tbody>
+</table>
+
+
+
+
+
+<dl class="details">
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source">
+      <ul class="dummy">
+        <li>
+          <a href="secp256k1.js.html">secp256k1.js</a>, <a href="secp256k1.js.html#line68">line 68</a>
+        </li>
+      </ul>
+    </dd>
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <div class="example-container">
+    <a class="link-icon" href="#sign-examples">
+      <svg height="20" width="20" style="fill: black;">
+        <use xlink:href="#linkIcon"></use>
+      </svg>
+    </a>
+    <h5 id="sign-examples">Example</h5>
+    
+
+  <pre class="prettyprint"><code>import * as vaultSecp256k1 from '@zippie/vault-api/secp256k1'
+
+const hash = shajs('sha256').update('test message').digest().toString('hex')
+vaultSecp256k1.sign(vault, 'm/0', hash)
+  .then(signature => console.info(signature))</code></pre>
+
+
+  </div>
+
+
+      
+    
+
+    
+
+    
+  </article>
+</section>
+
+
+
+
+  </div>
+
+  <br class="clear">
+
+  <footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a>
+  </footer>
+
+  <script src="scripts/linenumber.js"></script>
+  <script src="scripts/pagelocation.js"></script>
+
+  
+
+</body>
+</html>
