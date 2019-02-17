@@ -20,6 +20,7 @@
  * SOFTWARE.
 */
 import * as appcache from './appcache'
+import * as ipc from './ipc/'
 
 /**
  * Vault API
@@ -93,9 +94,11 @@ export default class Vault {
    *   Initialize vault enclave by loading in vault source with magiccookie key
    * if we have one available. Resolves when enclave is ready for commands.
    */
-  setup () {
+  async setup () {
     // Don't allow setup to be called multiple times.
     if (this.__onSetupReady !== undefined) return Promise.resolve()
+
+    await ipc.init(this)
 
     console.info('VAULT-API: Setting up Zippie Vault enclave.')
     return new Promise(function (resolve, reject) {
@@ -109,6 +112,7 @@ export default class Vault {
         // Setup incoming message handler.
         this.__on_message = this.__on_message.bind(this)
         this.__vault = window.parent
+
         window.addEventListener('message', this.__on_message)
         return resolve()
       }
@@ -297,6 +301,9 @@ export default class Vault {
       // Ignore messages not from vault
       if (event.source !== this.__vault) return
 
+      // Ignore IPC messages which are handled in ipc module.
+      if ('call' in event.data) return
+
       console.info('VAULT-API: Received message:', event.data)
 
       // If there's a receiver setup for this message, handle it.
@@ -343,7 +350,6 @@ export default class Vault {
 
       console.warn('VAULT-API: unhandled vault message event:', event)
   }
-
 
   /**
    * Parse hash query parameters into an object.
