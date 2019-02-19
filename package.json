@@ -1,7 +1,7 @@
 {
   "name": "@zippie/vault-api",
   "version": "1.0.14",
-  "description": "Zippie Vault Application API",
+  "description": "Zippie Vault API",
   "main": "src/index.js",
   "author": "Zippie Ltd.",
   "license": "BSD-3-Clause",
