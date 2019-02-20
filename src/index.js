@@ -23,21 +23,53 @@ import * as appcache from './appcache'
 import * as ipc from './ipc/'
 
 /**
- * Vault API configuration options
+ * The DeviceInfo type contains unique information associated with this device.
+ * Information like the devices unique ID is hashed with the application origin
+ * to stop developers from being able to track devices across different domains
+ * and applications.
  * 
+ * @typedef {Object} Vault#DeviceInfo
+ * 
+ * @property {string} deviceId Unique device ID
+ * 
+ */
+/**
+ * @typedef {Object} Vault#SigninOpts
+ * 
+ * @property {string} [launch] URI to redirect to after the signin process is completed.
+ * 
+ */
+/**
  * @typedef {Object} Vault#VaultOpts
  * 
  * @property {string} vault_uri Specify custom vault location
- * @property {boolean} ipc-mode Specify running in IPC service mode only
  * 
+ */
+/**
+ * @typedef {Object} Vault#VersionInfo
+ * 
+ * @property {string} BUILD_VERSION Vault build version
+ * @property {string} BUILD_TIMESTAMP Vault build timestamp
  */
 
 /**
- * Class for integrating Zippie platform into an application
+ * Class for initializing and integrating the Zippie Platform into an
+ * application. This class should be instantiated and setup in the main
+ * entry point of your code to properly handle signing a user in.
+ * 
+ * After calling [setup()]{@link Vault#setup}, you may query the instance
+ * property [isSignedIn]{@link Vault#isSignedIn} to check to see if the user
+ * was automatically signed in. If not, then the [signin()]{@link Vault#signin}
+ * method must be called to trigger the signin process.
+ * 
+ * It is good practice to build a button linked to the
+ * [signin()]{@link Vault#signin} process to work properly with browsers that
+ * have ITP 2.0 (Internet Tracking Prevention) support, like Safari and
+ * Firefox 65+
  * 
  * @class Vault
  * 
- * @param {Vault#VaultOpts} opts Vault API configuration. (optional)
+ * @param {Vault#VaultOpts} [opts] Vault API configuration.
  * 
  * @returns {Vault} New vault instance
  * 
@@ -50,6 +82,19 @@ import * as ipc from './ipc/'
  *  })
  *  .catch(e => { console.error(e) })
  * 
+ */
+/**
+ * Vault version information
+ * @member {Vault#VersionInfo} Vault#version
+ */
+/**
+ * Vault services configuration
+ * @member {Object} Vault#config
+ */
+/**
+ * Indicates whether the vault is initialized and the user is successfully
+ * signed in with this application to their Zippie identity.
+ * @member {boolean} Vault#isSignedIn
  */
 export default class Vault {
   constructor (opts) {
@@ -113,8 +158,12 @@ export default class Vault {
 
 
   /**
-   * Initialize vault enclave by loading in vault source with magiccookie key
-   * if we have one available. Resolves when enclave is ready for commands.
+   * Initialize the vault enclave by loading the vault into an iframe with
+   * a magiccookie key (if available). Resolves when the vault is ready for
+   * receiving messages.
+   * 
+   * This function may result in an automated signin, you can test for this
+   * by reading the [isSignedIn]{@link Vault#isSignedIn} property.
    * 
    * @method Vault#setup
    */
@@ -183,14 +232,15 @@ export default class Vault {
 
 
   /**
-   * When vault is setup correctly, this function initiates a signin process
-   * should be called from an interactive user component, like a button to work
-   * correctly with Safari browsers that have ITP 2.0
+   * When vault is setup correctly, this function initiates a signin process,
+   * which should be called from an interactive user component, like a button
+   * to work correctly with browsers that have ITP 2.0 (Internet Tracking
+   * Prevention) support, like Safari and Firefox 65+
    * 
    * @method Vault#signin
    * 
-   * @param {Object} opts Options to pass to Vault during signin process.
-   * @param {bool} noLogin (internal use only)
+   * @param {Vault#SigninOpts} [opts] Options to pass to Vault during signin process.
+   * @param {bool} [noLogin] (internal use only)
    */
   signin (opts, noLogin) {
     if (this.isSignedIn) return Promise.resolve()
@@ -274,14 +324,15 @@ export default class Vault {
 
 
   /**
-   * Send a request to the vault enclave. Returns a promise that resolves
-   * or rejects depending on the received result.
+   * Low-Level API which sends a raw request message to the vault enclave.
+   * Returns a promise that resolves or rejects depending on the received
+   * result.
    * 
    * @method Vault#message
    * 
-   * @param {Object} request Message to send
+   * @param {Vault#Message} request Message to send
    * 
-   * @returns {Promise}
+   * @returns {Promise} response
    */
   message (req) {
     if (!this.__iframe) {
@@ -298,32 +349,38 @@ export default class Vault {
   }
 
   /**
-   * Request identity enrollments, this is a list of devices and recovery
-   * methods.
-   * 
-   * @method Vault#enrollments
-   * 
-   * @returns {Array} Users' enrollments
-   */
-  enrollments () {
-    return this.message({ enrollments: null })
-  }
-
-  /**
    * Request this devices' identification information.
    * 
    * @method Vault#getDeviceInfo
    * 
-   * @returns {DeviceInfo} Device information
+   * @returns {Vault#DeviceInfo} Device information
    */
   getDeviceInfo () {
     return this.message({ getDeviceInfo: null })
   }
 
   /**
+   * Request identity enrollments, this is a list of devices and recovery
+   * methods.
+   * 
+   * @method Vault#enrollments
+   * 
+   * @private
+   * 
+   * @returns {Array.<Vault#Enrollment>} Users' enrollments
+   */
+  enrollments () {
+    return this.message({ enrollments: null })
+  }
+
+  /**
    * Request user data
    * 
    * @method Vault#getUserData
+   * 
+   * @private
+   * 
+   * @param {string} id User data key to get value of
    * 
    * @returns {Any} Userdata
    */
@@ -336,8 +393,10 @@ export default class Vault {
    * 
    * @method Vault#setUserData
    * 
-   * @param {string} id 
-   * @param {Any} value 
+   * @private
+   * 
+   * @param {string} id User data key to overwrite value of
+   * @param {Any} value New value
    */
   setUserData (id, value) {
     return this.message({ userdata: { set: { key: id, value: value }}})
@@ -384,6 +443,8 @@ export default class Vault {
             let magiccookie = window.localStorage.getItem('zippie-vault-cookie')
             if ('ready' in event.data && magiccookie) {
               return this.signin(this.__signin_opts, true)
+                .then(this.__get_vault_attr('version'))
+                .then(this.__get_vault_attr('config'))
                 .then(this.__get_vault_attr('isSignedIn'))
                 .then(function () {
                   if (this.isSignedIn) return appcache.init(this)
