@@ -21,18 +21,50 @@
  *
  */
 /**
- * Interface for accessing a remote IPC end-point
+ * @enum {string} IPCMemberType
+ */
+const IPCMemberType = {
+  /** Service event */
+  EVENT: 'event',
+  /** Service method */
+  METHOD: 'method',
+  /** Service property */
+  PROPERTY: 'property'
+}
+
+/**
+ * Describes a single member of an IPC services' interface
+ * @typedef {object} IPCMember
  * 
- * @interface IPCClient
+ * @property {IPCMemberType} type The member type, event, method, property, etc.
+ * @property {string} name The symbolic name of the member.
+ * @property {Number} [arity] Number of parameters expected for member calls.
  * 
  */
-/** @member {string} IPCClient#uri */
-/** @member {string} IPCClient#tag */
+/**
+ * Describes a dynamic service interface
+ * @typedef {IPCMember[]} IPCInterfaceSpec
+ * 
+ */
+/**
+ * Interface for accessing a remote IPC end-point.
+ * 
+ * Instances of this class are returned by
+ * [ipc.createClient]{@link module:ipc~createClient}, and are not
+ * instantiatable otherwise.
+ * 
+ * @class IPCClient
+ * 
+ * @see module:ipc~createClient
+ * 
+ */
+/** @member {string} IPCClient#uri Remote service end-point URI */
+/** @member {string} IPCClient#tag Remote service end-point descriptor */
 /**
  * Query remote end-point and return service interface specification
  * 
  * @function IPCClient#getInterface
- * @returns {InterfaceSpec} Remote IPC interface specification
+ * @returns {IPCInterfaceSpec} Remote IPC interface specification
  */
 
 var __context

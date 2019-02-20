@@ -21,31 +21,42 @@
  *
  */
 /**
- * Interface for accessing a remote IPC end-point
+ * Interface for creating an IPC service endpoint for other appliations
+ * to access.
  * 
- * @interface IPCService
+ * Instances of this class are returned by
+ * [ipc.createService]{@link module:ipc~createService}, and are not
+ * instantiatable otherwise.
+ * 
+ * @class IPCService
+ * 
+ * @see module:ipc~createService
  * 
  */
 /**
- * Register receiver function with service interface
+ * Register receiver function with service interface.
+ * 
+ * This method takes the function name and uses it to generate the
+ * {@link IPCInterfaceSpec} returned to remote clients.
  * 
  * @function IPCService#addReceiver
  * 
- * @params {function} receiver Interface function implementation
+ * @param {function} receiver Interface function implementation
  */
 /**
  * Perform service API setup completion and signal remote clients
- * that API is setup and ready.
+ * that API is setup and ready to receive requests.
  * 
  * @function IPCService#ready
  * 
  */
 /**
- * Query remote end-point and return service interface specification
+ * Get IPC service local interface, allows invoking service methods
+ * locally in original context.
  * 
  * @function IPCService#getLocalInterface
  * 
- * @returns {Interface} Local client API interface
+ * @returns {ServiceInterface} Local client API interface
  */
 
 var __context
