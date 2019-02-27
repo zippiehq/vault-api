@@ -80,7 +80,7 @@ export function walletInit(vault, apiUrl) {
  */
 export function getAccountForToken(vault, tokenAddr) {
     console.warn('VAULT-API: DEPRECATED: Accessing wallet API this way is deprecated, please update your apps to use @zippie/zippie-api.')
-    return messageWallet(vault, 'getAccountForToken', tokenAddr)
+    return messageWallet(vault, 'getAccountForToken', [tokenAddr])
 }
 
 /**
@@ -89,7 +89,7 @@ export function getAccountForToken(vault, tokenAddr) {
  */
 export function getPassportInfo(vault) {
     console.warn('VAULT-API: DEPRECATED: Accessing wallet API this way is deprecated, please update your apps to use @zippie/zippie-api.')
-    return messageWallet(vault, 'getPassportInfo')
+    return messageWallet(vault, 'getPassportInfo', [])
 }
 
 /**
@@ -98,7 +98,7 @@ export function getPassportInfo(vault) {
  */
 export function getPassportImage(vault) {
     console.warn('VAULT-API: DEPRECATED: Accessing wallet API this way is deprecated, please update your apps to use @zippie/zippie-api.')
-    return messageWallet(vault, 'getPassportImage')
+    return messageWallet(vault, 'getPassportImage', [])
 }
 
 /**
@@ -111,7 +111,7 @@ export function getPassportImage(vault) {
  */
 export function createPaymentLink(vault, tokenAddress, amount, message) {
     console.warn('VAULT-API: DEPRECATED: Accessing wallet API this way is deprecated, please update your apps to use @zippie/zippie-api.')
-    return messageWallet(vault, 'createPaymentLink', {tokenAddress, amount, message})
+    return messageWallet(vault, 'createPaymentLink', [tokenAddress, amount, message])
 }
 
 /**
@@ -122,7 +122,7 @@ export function createPaymentLink(vault, tokenAddress, amount, message) {
  */
 export function getTokenBalance(vault, tokenAddr) {
     console.warn('VAULT-API: DEPRECATED: Accessing wallet API this way is deprecated, please update your apps to use @zippie/zippie-api.')
-    return messageWallet(vault, 'getTokenBalance', tokenAddr)
+    return messageWallet(vault, 'getTokenBalance', [tokenAddr])
 }
 
 /**
@@ -133,7 +133,7 @@ export function getTokenBalance(vault, tokenAddr) {
  */
 export function getPaymentInfo(vault, hash) {
     console.warn('VAULT-API: DEPRECATED: Accessing wallet API this way is deprecated, please update your apps to use @zippie/zippie-api.')
-    return messageWallet(vault, 'getPaymentInfo', hash)
+    return messageWallet(vault, 'getPaymentInfo', [hash])
 }
 
 /**
@@ -144,7 +144,7 @@ export function getPaymentInfo(vault, hash) {
  */
 export function claimPayment(vault, paymentInfo) {
     console.warn('VAULT-API: DEPRECATED: Accessing wallet API this way is deprecated, please update your apps to use @zippie/zippie-api.')
-    return messageWallet(vault, 'claimPayment', paymentInfo)
+    return messageWallet(vault, 'claimPayment', [paymentInfo])
 }
 
 /**
@@ -155,7 +155,7 @@ export function claimPayment(vault, paymentInfo) {
  */
 export function createAccountForToken(vault, tokenAddress) {
     console.warn('VAULT-API: DEPRECATED: Accessing wallet API this way is deprecated, please update your apps to use @zippie/zippie-api.')
-    return messageWallet(vault, 'createAccountForToken', tokenAddress)
+    return messageWallet(vault, 'createAccountForToken', [tokenAddress])
 }
 
 export default { 
