@@ -75,7 +75,7 @@ describe('Wallet API', function() {
                 wallet.createAccountForToken(window.vault, token_contract).then((account) => {
                     console.info(account)
                     chai.expect(account).to.be.an('object')
-                    chai.expect(account).to.have.all.keys('accountAddress', 'approveTx', 'contractAddress', 'dappUri', 'm','r0','s0','signerAddress', 'tokenAddress', 'v0')
+                    chai.expect(account).to.include.keys('accountAddress', 'approveTx', 'contractAddress', 'dappUri', 'm','r0','s0','signerAddress', 'tokenAddress', 'v0')
                     done()
                 }).catch((error) => {
                     done(error)
