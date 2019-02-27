@@ -23,6 +23,7 @@ import * as constants from './constants'
 
 /**
  * @module wallet
+ * @ignore
  * 
  * @desc
  * Zippie Wallet API
@@ -42,6 +43,7 @@ var walletApiUrl = constants.ZippieWalletURL
 
 /**
  * Runs a method on the Wallet API
+ * @ignore
  * @param {Object} vault  Initialised Zippie Vault
  * @param {String} call Method Name to call on remote API
  * @param {Object} args Arguments for method call
@@ -54,6 +56,7 @@ function messageWallet(vault, call, args)
 
 /**
  * Initialises the Wallet API Iframe
+ * @ignore
  * @param {Object} vault  Initialised Zippie Vault
  * @param {String} apiUrl Wallet API URL
  * @returns {Promise}
@@ -71,6 +74,7 @@ export function walletInit(vault, apiUrl) {
 
 /**
  * Gets the users multisig account for a token contract address
+ * @ignore
  * @param {Object} vault Initialised Zippie Vault
  * @param {String} tokenAddr Token Contract Address
  */
@@ -80,7 +84,7 @@ export function getAccountForToken(vault, tokenAddr) {
 }
 
 /**
- * 
+ * @ignore
  * @param {Object} vault  Initialised Zippie Vault
  */
 export function getPassportInfo(vault) {
@@ -89,7 +93,7 @@ export function getPassportInfo(vault) {
 }
 
 /**
- * 
+ * @ignore
  * @param {Object} vault  Initialised Zippie Vault
  */
 export function getPassportImage(vault) {
@@ -99,6 +103,7 @@ export function getPassportImage(vault) {
 
 /**
  * Create a Payment Link for a specified token
+ * @ignore
  * @param {Object} vault  Initialised Zippie Vault
  * @param {String} tokenAddress
  * @param {Number} amount 
@@ -111,6 +116,7 @@ export function createPaymentLink(vault, tokenAddress, amount, message) {
 
 /**
  * Gets users balance of a specified token
+ * @ignore
  * @param {Object} vault  Initialised Zippie Vault
  * @param {String} tokenAddr Token Contract address
  */
@@ -121,6 +127,7 @@ export function getTokenBalance(vault, tokenAddr) {
 
 /**
  * Returns information about a Payment Link
+ * @ignore
  * @param {Object} vault  Initialised Zippie Vault
  * @param {String} hash Payment Link hash
  */
@@ -131,6 +138,7 @@ export function getPaymentInfo(vault, hash) {
 
 /**
  * Claims a Payment Link into a wallet account
+ * @ignore
  * @param {Object} vault  Initialised Zippie Vault
  * @param {Object} paymentLink Payment Link Info
  */
@@ -141,6 +149,7 @@ export function claimPayment(vault, paymentInfo) {
 
 /**
  * Create a whitelisted multisig account for a particular Token
+ * @ignore
  * @param {Object} vault Initialised Zippie Vault
  * @param {String} tokenAddress Contract address for Token
  */
