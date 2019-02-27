@@ -49,7 +49,7 @@ var walletApiUrl = constants.ZippieWalletURL
  */
 function messageWallet(vault, call, args)
 {
-    return vault.message({'IPCRouterRequest' : {target: walletApiUrl, payload: {call: call, args: args }}})
+    return vault.message({'IPCRouterRequest' : {target: walletApiUrl, payload: {call: call, args: args, tag: 'wallet'}}})
 }
 
 /**
