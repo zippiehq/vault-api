@@ -485,7 +485,7 @@ export default class Vault {
     if (p[0] !== '') {
       for (let i = 0; i < p.length; i++) {
         let parts = p[i].split('=')
-        params[parts[0]] = parts[1]
+        params[parts[0]] = decodeURIComponent(parts[1])
       }
     }
 

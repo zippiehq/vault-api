@@ -20,8 +20,8 @@
  * SOFTWARE.
  *
  */
-import * as Clients from './client'
-import * as Services from './service'
+import * as Client from './client'
+import * as Service from './service'
 
 /** @module ipc */
 
@@ -39,8 +39,8 @@ var __context
 export async function init (vault) {
   __context = vault
 
-  Clients.init(vault)
-  Services.init(vault)
+  Client.init(vault)
+  Service.init(vault)
 
   vault.ipc = {
     /**
@@ -60,7 +60,7 @@ export async function init (vault) {
      *   })
      * 
      */
-    createClient: Clients.connect,
+    createClient: Client.connect,
 
     /**
      * @function createService
@@ -78,8 +78,8 @@ export async function init (vault) {
      *     ipc.ready()
      *   })
      */
-    createService: Services.register,
+    createService: Service.register,
   }
 
-  window.addEventListener('message', Services.dispatch)
+  window.addEventListener('message', Service.dispatch)
 }
