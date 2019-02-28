@@ -176,7 +176,7 @@ function method (endpoint, tag, method, arity) {
 
     return message.apply(
       null,
-      [endpoint, tag, method, [Array.prototype.slice.call(arguments)]]
+      [endpoint, tag, method, Array.prototype.slice.call(arguments)]
     )
   }
 }
