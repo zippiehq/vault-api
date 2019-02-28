@@ -47,7 +47,6 @@ npm run example
 ### Imports
 ```javascript
 import Vault from '@zippie/vault-api';
-import { keyInfo, sign, encrypt, decrypt } from './secp256k1.js'
 import * as shajs from 'sha.js';
 ```
 
@@ -55,9 +54,9 @@ import * as shajs from 'sha.js';
 The init call is the entry point to the zippie vault, this call will check for an existing vault service worker and redirect the user to onboarding if required
 
 ```javascript
-const vault = new Vault({vault_uri: 'https://vault.dev.zippie.org' })
+const vault = new Vault({vault_uri: 'https://vault.dev.zippie.org'})
 vault.setup()
-.then(vault.signin)
+.then(_ => vault.signin())
 .then(
   result => {
     console.log("Zippie Vault Ready & Signed In");
@@ -73,44 +72,46 @@ Get public key information for a particular vault path.
 These will be particular to your dapp, and you can have as many as you like
 eg. 'm/0', 'm/1', 'm/1/1' .etc
 ```javascript
-keyInfo(vault, 'm/0')
+vault.secp256k1.keyInfo('m/0')
   .then(result => {
     console.log("keyInfo: " + result.pubkey);
   }
-);
+)
 ```
 
 ### Sign
 Cryptographically sign a piece of data.
 The data needs to be summarised in a digest like sha256
 ```javascript
-sign(vault, 'm/0', shajs('sha256').update("data to sign goes here").digest())
-  .then(signedOutput => {
-    console.log("sign: " + signedOutput.signature);
-  }
-);
+vault.secp256k1.sign(
+  'm/0',
+  shajs('sha256').update("data to sign goes here").digest()
+)
+.then(signedOutput => {
+  console.log("sign: " + signedOutput.signature);
+})
 ```
 
 ### Encrypt
 Encrypt a piece of data
 The data needs to be encoded into a hex string before sending
 ```javascript
-encrypt(vault, publicKey, Buffer.from("message to encrypt").toString('hex'))
+vault.secp256k1.encrypt(publicKey, Buffer.from("message to encrypt").toString('hex'))
   .then(encryptedMessage => {
     console.log("encrypt: " + encryptedMessage.ciphertext);
   }
-);
+)
 ```
 
 ### Decrypt
 Reverse the encryption process to get back your message
 
 ```javascript
-decrypt(vault, 'm/0', encryptedMessage)
+vault.secp256k1.decrypt('m/0', encryptedMessage)
   .then(message => {
     console.log("decrypt: " + Buffer.from(message, 'hex').toString());
   }
-);
+)
 ```
 
 ## License
