@@ -104,10 +104,10 @@ export function register (tag) {
  * @param {string} tag Local service descriptor
  */
 function addReceiver (tag) {
-  return function (f) {
-    console.info('VAULT-API-IPC (Service): Adding "' + tag + '" receiver:', f.name)
+  return function (f, symbol) {
+    console.info('VAULT-API-IPC (Service): Adding "' + tag + '" receiver:', symbol || f.name)
     const service = __services[tag]
-    service[f.name] = f
+    service[symbol || f.name] = f
   }
 }
 
