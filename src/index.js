@@ -337,7 +337,7 @@ export default class Vault {
    * @returns {Promise} response
    */
   message (req) {
-    if (!this.__iframe) {
+    if (!this.__vault) {
       return Promise.reject({ error: 'Vault not initialized.' })
     }
 
@@ -507,4 +507,3 @@ export default class Vault {
     }.bind(this)
   }
 }
-
