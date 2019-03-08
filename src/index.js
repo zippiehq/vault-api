@@ -302,7 +302,7 @@ export default class Vault {
     }.bind(this))
 
     .then(function (r) {
-      if (r && 'error' in r && 'launch' in r && !this.__signin_opts['inhibit-signup']) {
+      if (r && r.error && r.launch && !this.__signin_opts['inhibit-signup']) {
         this.__signin_opts.launch = this.__signin_opts.launch || window.location.href
 
         let paramstr = ''
@@ -426,7 +426,7 @@ export default class Vault {
         delete this.__receivers[event.data.callback]
 
         // Call receiver promise reject
-        if ('error' in event.data) return receiver[1](event.data.error)
+        if (event.data.error) return receiver[1](event.data.error)
 
         // Call receiver promise resolve
         return receiver[0](event.data.result)
@@ -443,7 +443,7 @@ export default class Vault {
             // it, and attempt an automatic signin, we can presume we've already
             // been granted cookie access from a previous session.
             let magiccookie = window.localStorage.getItem('zippie-vault-cookie')
-            if ('ready' in event.data && magiccookie) {
+            if ('ready' in event.data && magiccookie && !this.__params.itp) {
               return this.signin(this.__signin_opts, true)
                 .then(this.__get_vault_attr('version'))
                 .then(this.__get_vault_attr('config'))
