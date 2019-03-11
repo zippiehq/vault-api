@@ -270,7 +270,7 @@ export default class Vault {
       if (noLogin) return resolve()
 
       //   Send 'login' message for ITP support.
-      return this.message({login: null})
+      this.message({login: null})
         .then(function (r) {
           console.info('VAULT-API: Vault reports ITP access granted.')
 
@@ -287,11 +287,6 @@ export default class Vault {
             console.info('VAULT-API: ITP ITP ITP ITP')
             delete this.__params['itp']
           }
-        }.bind(this))
-        .catch(function (e) {
-          if (e !== 'ITP_REQUEST_FAILURE') return Promise.reject(e)
-          console.warn('VAULT-API: Vault reported ITP request failure, redirecting to vault for authorization.')
-          window.location = this.__opts.vault_uri + '#?launch=' + window.location + ';itp'    
         }.bind(this))
     }.bind(this))
 
@@ -318,9 +313,20 @@ export default class Vault {
     }.bind(this))
 
     .catch(function (e) {
-      if (e !== 'ITP_REQUEST_FAILURE') return Promise.reject(e)
-      console.warn('VAULT-API: Vault reported ITP request failure, redirecting to vault for authorization.')
-      window.location = this.__opts.vault_uri + '#?launch=' + window.location + ';itp'
+      if (e === 'ITP_REQUEST_FAILURE') {
+        console.warn('VAULT-API: Vault reported ITP request failure, redirecting to vault for authorization.')
+        window.location = this.__opts.vault_uri + '#?launch=' + window.location + ';itp'
+        return
+      }
+
+      if (e.error === 'VAULT_NO_DATACOOKIE' || e.error === 'VAULT_DECRYPT_DATACOOKIE_ERROR') {
+        console.warn('VAULT-API: Vault reported data cookie issue.')
+        window.localStorage.removeItem('zippie-vault-cookie')
+        window.location = this.__opts.vault_uri + '#?launch=' + window.location
+        return
+      }
+
+      return Promise.reject(e)
     }.bind(this))
   }
 
@@ -435,7 +441,7 @@ export default class Vault {
       if ('login' in event.data || 'ready' in event.data) {
         console.info('VAULT-API: processing vault login/ready message.')
 
-        this.__get_vault_attr('version')()
+        this.__get_vault_attr('version')() 
           .then(this.__get_vault_attr('config'))
           .then(this.__get_vault_attr('isSignedIn'))
           .then(async function () {
@@ -443,7 +449,7 @@ export default class Vault {
             // it, and attempt an automatic signin, we can presume we've already
             // been granted cookie access from a previous session.
             let magiccookie = window.localStorage.getItem('zippie-vault-cookie')
-            if ('ready' in event.data && magiccookie && !this.__params.itp) {
+            if ('ready' in event.data && magiccookie) {
               return this.signin(this.__signin_opts, true)
                 .then(this.__get_vault_attr('version'))
                 .then(this.__get_vault_attr('config'))
