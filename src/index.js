@@ -101,60 +101,66 @@ export default class Vault {
   constructor (opts) {
     opts = opts || {}
 
-    // Parse params from URI fragment
-    this.__params = this.__parse_opts(window.location)
-
-    // Strip params from URI fragment
-    if (window.location.hash.indexOf('?') !== -1) {
-      window.location.hash = window.location.hash.slice(0, window.location.hash.indexOf('?'))
-    }
-
-    // Enclave DOM objects
-    this.__iframe = null
     this.__vault = null
+    this.__opts = opts
 
     // Message receiver dispatch variables
     this.__callback_counter = 0
     this.__receivers = {}
 
-    // Construct iframe to load vault enclave
-    var iframe = document.createElement('iframe')
+    if (!opts.klaatu) {
+      this.__klaatu = false
+      // Parse params from URI fragment
+      this.__params = this.__parse_opts(window.location)
 
-    iframe.style.display = 'none'
-
-    iframe.sandbox += ' allow-storage-access-by-user-activation'
-    iframe.sandbox += ' allow-same-origin'
-    iframe.sandbox += ' allow-scripts'
-
-    // Setup vault URI default if none provided in constructor opts.
-    if (!opts.vault_uri) {
-      opts.vault_uri = 'https://vault.zippie.org'
-
-      if (window.location.host.split('.').indexOf('dev') !== -1) {
-        opts.vault_uri = 'https://vault.dev.zippie.org'
-      } else
-      if (window.location.host.split('.').indexOf('testing') !== -1) {
-        opts.vault_uri = 'https://vault.testing.zippie.org'
+      // Strip params from URI fragment
+      if (window.location.hash.indexOf('?') !== -1) {
+        window.location.hash = window.location.hash.slice(0, window.location.hash.indexOf('?'))
       }
+      // Enclave DOM objects
+      this.__iframe = null
+ 
+
+      // Construct iframe to load vault enclave
+      var iframe = document.createElement('iframe')
+
+      iframe.style.display = 'none'
+
+      iframe.sandbox += ' allow-storage-access-by-user-activation'
+      iframe.sandbox += ' allow-same-origin'
+      iframe.sandbox += ' allow-scripts'
+
+      // Setup vault URI default if none provided in constructor opts.
+      if (!opts.vault_uri) {
+        opts.vault_uri = 'https://vault.zippie.org'
+
+        if (window.location.host.split('.').indexOf('dev') !== -1) {
+          opts.vault_uri = 'https://vault.dev.zippie.org'
+        } else
+        if (window.location.host.split('.').indexOf('testing') !== -1) {
+          opts.vault_uri = 'https://vault.testing.zippie.org'
+        }
+      }
+
+      // If vault URI set in local storage, it overrides above default.
+      if (window.localStorage.getItem('zippie-vault-url') !== null) {
+        opts.vault_uri = window.localStorage.getItem('zippie-vault-url')
+      }
+
+      // 'zippie-vault' query parameter overrides and persists to local storage.
+      if (this.__params['zippie-vault'] !== undefined) {
+        opts.vault_uri = this.__params['zippie-vault']
+        window.localStorage.setItem('zippie-vault-url', opts.vault_uri)
+      }
+
+      // Add vault enclave iframe to DOM
+      document.body.appendChild(iframe)
+      this.__iframe = iframe
+      this.__vault = iframe.contentWindow
+    } else {
+      this.__klaatu = true
+      this.__vault = window.parent
     }
-
-    // If vault URI set in local storage, it overrides above default.
-    if (window.localStorage.getItem('zippie-vault-url') !== null) {
-      opts.vault_uri = window.localStorage.getItem('zippie-vault-url')
-    }
-
-    // 'zippie-vault' query parameter overrides and persists to local storage.
-    if (this.__params['zippie-vault'] !== undefined) {
-      opts.vault_uri = this.__params['zippie-vault']
-      window.localStorage.setItem('zippie-vault-url', opts.vault_uri)
-    }
-
-    // Add vault enclave iframe to DOM
-    document.body.appendChild(iframe)
-
-    this.__opts = opts
-    this.__iframe = iframe
-    this.__vault = iframe.contentWindow
   }
 
 
@@ -177,58 +183,63 @@ export default class Vault {
 
     console.info('VAULT-API: Setting up Zippie Vault enclave.')
     return new Promise(function (resolve, reject) {
-      if ('ipc-mode' in this.__opts) {
-        console.info('VAULT-API: Running in IPC mode.')
-
-        // Setup async response handlers for when we hear "ready" from vault.
-        this.__onSetupReady = resolve
-        this.__onSetupError = reject
-
-        // Setup incoming message handler.
-        this.__on_message = this.__on_message.bind(this)
-        this.__vault = window.parent
-
-        window.addEventListener('message', this.__on_message)
-        return resolve()
-      }
-
-      //   Get magic vault cookie by whatever means necessary, if provided via
-      // query parameters, then save /new/ value to local storage.
-      let magiccookie = window.localStorage.getItem('zippie-vault-cookie')
-      if (this.__params['vault-cookie'] !== undefined) {
-        magiccookie = this.__params['vault-cookie']
-        window.localStorage.setItem('zippie-vault-cookie', magiccookie)
-      }
-
-      if (magiccookie === '') magiccookie = null
-
-      //   If no magic cookie was discovered redirect to vault in root mode,
-      // to pick up a new magic cookie, or require user sign up.
-      if (!this.__params['inhibit-signup'] && !magiccookie) {
-        console.warn('VAULT-API: No vault cookie provided, redirecting to vault.')
-        window.location = this.__opts.vault_uri +
-          '#?launch=' + window.location + ';inhibit-signup'
-        return reject()
-      }
-
-      // Setup incoming message handler.
       this.__on_message = this.__on_message.bind(this)
-      window.addEventListener('message', this.__on_message)
-
-      //   We have a magic cookie, which means we should have an identity
-      // initialize vault with our cookie.
-      if (magiccookie !== null) {
-        console.info('VAULT-API: Found magic cookie:', magiccookie)
-        this.__iframe.src = this.__opts.vault_uri + '#?magiccookie=' + magiccookie
-      }  else {
-        this.__iframe.src = this.__opts.vault_uri
-      }
-
       // Setup async response handlers for when we hear "ready" from vault.
       this.__onSetupReady = resolve
       this.__onSetupError = reject
 
-      console.info('VAULT-API: Loading vault from URI:', this.__iframe.src)
+      window.addEventListener('message', this.__on_message)
+
+      if (!this.__klaatu) {
+        if ('ipc-mode' in this.__opts) {
+          console.info('VAULT-API: Running in IPC mode.')
+
+  
+          // Setup incoming message handler.
+          this.__vault = window.parent
+ 
+          return resolve()
+        }
+
+        //   Get magic vault cookie by whatever means necessary, if provided via
+        // query parameters, then save /new/ value to local storage.
+        let magiccookie = window.localStorage.getItem('zippie-vault-cookie')
+        if (this.__params['vault-cookie'] !== undefined) {
+          magiccookie = this.__params['vault-cookie']
+          window.localStorage.setItem('zippie-vault-cookie', magiccookie)
+        }
+
+        if (magiccookie === '') magiccookie = null
+
+        //   If no magic cookie was discovered redirect to vault in root mode,
+        // to pick up a new magic cookie, or require user sign up.
+        if (!this.__params['inhibit-signup'] && !magiccookie) {
+          console.warn('VAULT-API: No vault cookie provided, redirecting to vault.')
+          window.location = this.__opts.vault_uri +
+            '#?launch=' + window.location + ';inhibit-signup'
+          return reject()
+        }
+
+      // Setup incoming message handler.
+
+      //   We have a magic cookie, which means we should have an identity
+      // initialize vault with our cookie.
+        if (magiccookie !== null) {
+         console.info('VAULT-API: Found magic cookie:', magiccookie)
+         this.__iframe.src = this.__opts.vault_uri + '#?magiccookie=' + magiccookie
+       }  else {
+         this.__iframe.src = this.__opts.vault_uri
+       }  
+
+        // Setup async response handlers for when we hear "ready" from vault.
+       this.__onSetupReady = resolve
+       this.__onSetupError = reject
+
+       console.info('VAULT-API: Loading vault from URI:', this.__iframe.src)
+      } else {
+        this.__vault = window.parent
+        return resolve()
+      }
     }.bind(this))
   }
 
@@ -245,6 +256,8 @@ export default class Vault {
    * @param {bool} [noLogin] (internal use only)
    */
   signin (opts, noLogin) {
+    if (this.__klaatu) return appcache.init(this)
+
     if (this.isSignedIn) return Promise.resolve()
 
     this.__signin_opts = opts || {}
@@ -264,7 +277,7 @@ export default class Vault {
       console.info('VAULT-API: Redirecting to:', this.__opts.vault_uri + '#?' + paramstr)
       window.location = this.__opts.vault_uri + '#?' + paramstr
       return Promise.reject()
-    }
+    }  
 
     return new Promise(function (resolve, reject) {
       if (noLogin) return resolve()
@@ -281,12 +294,14 @@ export default class Vault {
           //   This should cause a "ready" message down the line, which is
           // picked up by the above promise resolve/reject, which in turn
           // triggers the continuation of the signin process.
-          this.message({reboot: null})
-
-          if ('itp' in this.__params) {
-            console.info('VAULT-API: ITP ITP ITP ITP')
-            delete this.__params['itp']
+          if (!this.__klaatu) {
+            this.message({reboot: null})
+            if ('itp' in this.__params) {
+              console.info('VAULT-API: ITP ITP ITP ITP')
+              delete this.__params['itp']
+            }  
           }
+
         }.bind(this))
     }.bind(this))
 
@@ -410,6 +425,10 @@ export default class Vault {
     return this.message({ userdata: { set: { key: id, value: value }}})
   }
 
+  wmRoll (rollInfo) {
+    return this.message({ wm_roll: rollInfo})
+  }
+
 
   /**
    * Event handler for incoming messages from vault.
@@ -438,7 +457,7 @@ export default class Vault {
         return receiver[0](event.data.result)
       }
 
-      if ('login' in event.data || 'ready' in event.data) {
+      if (!this.__klaatu && 'login' in event.data || 'ready' in event.data) {
         console.info('VAULT-API: processing vault login/ready message.')
 
         this.__get_vault_attr('version')() 
