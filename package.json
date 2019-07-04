@@ -16,7 +16,8 @@
     "doc": "jsdoc --configure .jsdoc.json --verbose"
   },
   "dependencies": {
-    "sha.js": "^2.4.11"
+    "sha.js": "^2.4.11",
+    "store": "^2.0.12"
   },
   "devDependencies": {
     "@babel/cli": "^7.2.3",
