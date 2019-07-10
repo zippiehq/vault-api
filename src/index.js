@@ -196,9 +196,13 @@ export default class Vault {
 
   
           // Setup incoming message handler.
-          this.__vault = window.parent
- 
-          return resolve()
+          this.__vault = window.parent 
+          // IPC doesn't call signin
+          if (this.isSignedIn) {
+            return appcache.init()
+          } else {
+            return resolve()
+          }
         }
 
         //   Get magic vault cookie by whatever means necessary, if provided via
@@ -323,7 +327,7 @@ export default class Vault {
 
         window.location = r.launch + '#?' + paramstr
       }
-
+      
       return appcache.init(this)
     }.bind(this))
 
@@ -439,7 +443,7 @@ export default class Vault {
       // Ignore messages not from vault
       if (event.source !== this.__vault) return
 
-      // Ignore IPC messages which are handled in ipc module.
+      // Ignore IPC messages which are handled in ipcmodule.
       if ('call' in event.data) return
 
       console.info('VAULT-API: Received message:', event.data)
