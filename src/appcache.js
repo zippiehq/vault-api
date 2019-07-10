@@ -50,13 +50,13 @@ export function get (vault, key, req) {
   let value = vault.appcache.get(key)
   if (value) {
     console.info('VAULT-API: VaultAppCache pulled value for message:', req)
-    return Promise.resolve(JSON.parse(value))
+    return Promise.resolve(value)
   }
 
   return vault.message(req)
     .then(r => {
       console.info('VAULT-API: VaultAppCache caching value for message:', req)
-      vault.appcache.set(key, JSON.stringify(r))
+      vault.appcache.set(key, r)
       return r
     })
 }
