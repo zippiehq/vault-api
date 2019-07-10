@@ -194,15 +194,11 @@ export default class Vault {
         if ('ipc-mode' in this.__opts) {
           console.info('VAULT-API: Running in IPC mode.')
 
-  
+          
           // Setup incoming message handler.
           this.__vault = window.parent 
           // IPC doesn't call signin
-          if (this.isSignedIn) {
-            return appcache.init()
-          } else {
-            return resolve()
-          }
+          return appcache.init()
         }
 
         //   Get magic vault cookie by whatever means necessary, if provided via
