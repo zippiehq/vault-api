@@ -60,7 +60,7 @@ export async function init (vault) {
       const cacheId = shajs('sha256').update('secp256k1.keyInfo-' + derive)
         .digest().toString('hex')
 
-      return appcache.get(vault, cacheId, {
+      return appcache.get(__context, cacheId, {
         secp256k1KeyInfo: { key: { derive }}
       })
     },

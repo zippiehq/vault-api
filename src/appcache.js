@@ -27,27 +27,27 @@ const storeMemoryStorage = require('store/storages/memoryStorage')
 
 export async function init (vault) {
   if (vault.__klaatu) {
-    vault.appcache = storeEngine.createStore([storeMemoryStorage], [])
+    vault.appcachestore = storeEngine.createStore([storeMemoryStorage], [])
   } else {
-    vault.appcache = storeEngine.createStore([storeLocalStorage], [])
+    vault.appcachestore = storeEngine.createStore([storeLocalStorage], [])
   }
 
   console.info('VAULT-API: VaultAppCache checking device ID...')
 
-  const deviceId = vault.appcache.get('zippie-device-id')
+  const deviceId = vault.appcachestore.get('zippie-device-id')
   const deviceInfo = await vault.getDeviceInfo()
 
   if (deviceInfo.deviceId !== deviceId) {
     console.info('VAULT-API: VaultAppCache device ID mismatch, clearing...')
     clear(vault)
-    vault.appcache.set('zippie-device-id', deviceInfo.deviceId)
+    vault.appcachestore.set('zippie-device-id', deviceInfo.deviceId)
   }
 }
 
 export function get (vault, key, req) {
   key = 'zippie-appcache-' + key
 
-  let value = vault.appcache.get(key)
+  let value = vault.appcachestore.get(key)
   if (value) {
     console.info('VAULT-API: VaultAppCache pulled value for message:', req)
     return Promise.resolve(value)
@@ -56,18 +56,18 @@ export function get (vault, key, req) {
   return vault.message(req)
     .then(r => {
       console.info('VAULT-API: VaultAppCache caching value for message:', req)
-      vault.appcache.set(key, r)
+      vault.appcachestore.set(key, r)
       return r
     })
 }
 
 export function remove (vault, key) {
-  vault.appcache.remove('zippie-appcache-' + key)
+  vault.appcachestore.remove('zippie-appcache-' + key)
 }
 
 export function clear (vault) {
   var keys = []
-  vault.appcache.each(function(val, key) {
+  vault.appcachestore.each(function(val, key) {
     if (key.startsWith('zippie-appcache-')) {
       keys.push(key)
     }
@@ -75,7 +75,7 @@ export function clear (vault) {
   
   for (let i = 0; i < keys.length; i++) {
     if (key.startsWith('zippie-appcache-')) {
-      vault.appcache.remove(key)
+      vault.appcachestore.remove(key)
     }
   }
 }
