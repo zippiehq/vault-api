@@ -198,7 +198,7 @@ export default class Vault {
           // Setup incoming message handler.
           this.__vault = window.parent 
           // IPC doesn't call signin
-          return appcache.init()
+          return appcache.init(this)
         }
 
         //   Get magic vault cookie by whatever means necessary, if provided via
