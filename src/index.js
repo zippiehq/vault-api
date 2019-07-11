@@ -193,12 +193,15 @@ export default class Vault {
       if (!this.__klaatu) {
         if ('ipc-mode' in this.__opts) {
           console.info('VAULT-API: Running in IPC mode.')
-
-          
           // Setup incoming message handler.
           this.__vault = window.parent 
           // IPC doesn't call signin
-          return appcache.init(this)
+          appcache.init(this).then(() => {
+             resolve()
+          }).catch((err) => {
+             reject(err)
+          })
+          return
         }
 
         //   Get magic vault cookie by whatever means necessary, if provided via

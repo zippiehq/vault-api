@@ -42,6 +42,7 @@ export async function init (vault) {
     clear(vault)
     vault.appcachestore.set('zippie-device-id', deviceInfo.deviceId)
   }
+  console.log('VAULT-API: Appcache initialized')
 }
 
 export function get (vault, key, req) {
@@ -74,8 +75,6 @@ export function clear (vault) {
   })
   
   for (let i = 0; i < keys.length; i++) {
-    if (key.startsWith('zippie-appcache-')) {
-      vault.appcachestore.remove(key)
-    }
+    vault.appcachestore.remove(keys[i])
   }
 }
