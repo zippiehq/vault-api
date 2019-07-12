@@ -26,11 +26,7 @@ const storeLocalStorage = require('store/storages/localStorage')
 const storeMemoryStorage = require('store/storages/memoryStorage')
 
 export async function init (vault) {
-  if (vault.__klaatu) {
-    vault.appcachestore = storeEngine.createStore([storeMemoryStorage], [])
-  } else {
-    vault.appcachestore = storeEngine.createStore([storeLocalStorage], [])
-  }
+  vault.appcachestore = storeEngine.createStore([storeLocalStorage], [])
 
   console.info('VAULT-API: VaultAppCache checking device ID...')
 
