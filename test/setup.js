@@ -4,5 +4,11 @@ import * as constants from '../src/constants.js'
 
 mocha.setup('bdd');
 
-var opts = {vault_uri: constants.ZippieVaultURL}
-window.vault = new Vault(opts)
+if (window.top !== window.self) {
+  var opts = {klaatu: true}
+  window.vault = new Vault(opts)
+}
+else {
+  var opts = {vault_uri: constants.ZippieVaultURL}
+  window.vault = new Vault(opts)
+}
