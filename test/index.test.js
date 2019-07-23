@@ -3,6 +3,7 @@ import * as constants from '../src/constants.js'
 
 describe('Vault-API', function () {
     it('setup', function (done) {
+      this.timeout(20000)
       window.vault.setup().then(() => {
         window.vault.signin().then(() => {
           done();
@@ -11,22 +12,21 @@ describe('Vault-API', function () {
     })
  
     it('version', function(done) {
-      window.vault.version().then((version) => {
-       chai.expect(version).to.be.an('object')
-       chai.expect(version).to.have.property('BUILD_VERSION').that.is.a('string')
-       chai.expect(version).to.have.property('BUILD_TIMESTAMP').that.is.a('string')
-       done();
-     }) 
+      chai.expect(window.vault.version).to.be.an('object')
+      chai.expect(window.vault.version).to.have.property('BUILD_VERSION').that.is.a('string')
+      chai.expect(window.vault.version).to.have.property('BUILD_TIMESTAMP').that.is.a('string')
+      done();
     })
 
     it('config', function(done) {
-      window.vault.config().then((config) => {
-        chai.expect(config).to.be.an('object')
-        chai.expect(config).to.have.all.keys('apis', 'apps', 'uri')
-        chai.expect(config.apis).to.have.all.keys('fms', 'permastore')
-        chai.expect(config.apps).to.have.all.keys('root', 'user')
-        done();
-      })
+      console.log(window.vault.config)
+      chai.expect(window.vault.config).to.be.an('object')
+      chai.expect(window.vault.config).to.have.all.keys(['apis', 'apps', 'uri'])
+      chai.expect(window.vault.config.apis).to.be.an('object')
+      
+      chai.expect(window.vault.config.apis).to.have.all.keys(['fms', 'permastore', 'mailbox'])
+      chai.expect(window.vault.config.apps).to.have.all.keys(['root', 'user'])
+      done();
     })
 
     it('enrollments', function(done) {
