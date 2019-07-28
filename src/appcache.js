@@ -20,57 +20,60 @@
  * SOFTWARE.
  *
  */
-
-const storeEngine = require('store/src/store-engine')
-const storeLocalStorage = require('store/storages/localStorage')
-const storeMemoryStorage = require('store/storages/memoryStorage')
-
 export async function init (vault) {
-  vault.appcachestore = storeEngine.createStore([storeLocalStorage], [])
-
+  if (vault.__klaatu) 
+    return
+    
   console.info('VAULT-API: VaultAppCache checking device ID...')
+  
 
-  const deviceId = vault.appcachestore.get('zippie-device-id')
+  const deviceId = localStorage.getItem('zippie-device-id')
   const deviceInfo = await vault.getDeviceInfo()
 
   if (deviceInfo.deviceId !== deviceId) {
     console.info('VAULT-API: VaultAppCache device ID mismatch, clearing...')
     clear(vault)
-    vault.appcachestore.set('zippie-device-id', deviceInfo.deviceId)
+    localStorage.setItem('zippie-device-id', deviceInfo.deviceId)
   }
-  console.log('VAULT-API: Appcache initialized')
 }
 
 export function get (vault, key, req) {
-  key = 'zippie-appcache-' + key
+  if (!vault.__klaatu)
+  {
+    key = 'zippie-appcache-' + key
 
-  let value = vault.appcachestore.get(key)
-  if (value) {
-    console.info('VAULT-API: VaultAppCache pulled value for message:', req)
-    return Promise.resolve(value)
-  }
+    let value = localStorage.getItem(key)
+    if (value) {
+      console.info('VAULT-API: VaultAppCache pulled value for message:', req)
+      return Promise.resolve(JSON.parse(value))
+    }  
+  }  
 
   return vault.message(req)
     .then(r => {
-      console.info('VAULT-API: VaultAppCache caching value for message:', req)
-      vault.appcachestore.set(key, r)
+      if (!vault.__klaatu) {
+        console.info('VAULT-API: VaultAppCache caching value for message:', req)
+        localStorage.setItem(key, JSON.stringify(r))
+      }
       return r
     })
 }
 
-export function remove (vault, key) {
-  vault.appcachestore.remove('zippie-appcache-' + key)
+export function remove (key) {
+  if (vault.__klaatu) 
+     return
+     
+  localStorage.removeItem('zippie-appcache-' + key)
 }
 
 export function clear (vault) {
-  var keys = []
-  vault.appcachestore.each(function(val, key) {
+  if (vault.__klaatu)
+     return
+     
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i)
     if (key.startsWith('zippie-appcache-')) {
-      keys.push(key)
+      localStorage.removeItem(key)
     }
-  })
-  
-  for (let i = 0; i < keys.length; i++) {
-    vault.appcachestore.remove(keys[i])
   }
 }

@@ -1,6 +1,7 @@
 const path = require('path')
 const webpack = require('webpack')
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const HtmlWebpackInlineSourcePlugin = require('html-webpack-inline-source-plugin')
 
 module.exports = {
   mode: 'development',
@@ -9,14 +10,17 @@ module.exports = {
   devServer: {
     https: true,
     port: 4000,
-    contentBase: './dist'
+    contentBase: './dist',
+    disableHostCheck: true
   },
 
   plugins: [
     new HtmlWebpackPlugin({
       template: './test/index.html',
-      filename: './index.html'
-   })
+      filename: './index.html',
+      inlineSource: '.(js|css)$'
+   }),
+   new HtmlWebpackInlineSourcePlugin()
   ],
 
   resolve: {
