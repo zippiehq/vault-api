@@ -22,6 +22,7 @@
 import * as appcache from './appcache'
 import * as ipc from './ipc/'
 import * as secp256k1 from './secp256k1'
+import * as runtime from './runtime'
 
 /**
  * The DeviceInfo type contains unique information associated with this device.
@@ -184,7 +185,8 @@ export default class Vault {
 
     await ipc.init(this)
     await secp256k1.init(this)
-
+    await runtime.init(this)
+    
     console.info('VAULT-API: Setting up Zippie Vault enclave.')
     return new Promise(function (resolve, reject) {
       let magiccookie
