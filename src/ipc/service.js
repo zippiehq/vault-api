@@ -119,6 +119,11 @@ function addReceiver (tag) {
  * @param {string} tag Local service descriptor
  */
 function serviceReady (tag) {
+  if (__context.__klaatu) {
+    return function (f) {
+      console.log('VAULT-API-IPC: DEPRECATED: serviceReady')
+    }
+  }
   return function (f) {
     console.info('VAULT-API-IPC (Service): Sending "' + tag + '" ready.')
     __context.message({ IPCRouterRequest: { target: window.origin, callback: 'init-' + window.origin }})
