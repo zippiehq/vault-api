@@ -7,6 +7,7 @@ describe('Vault-API', function () {
       it('klaatu-first-setup', function (done) {
         this.timeout(20000)
         window.vault.setup().then(() => {
+          vault.message({wm_ready: {}}).then(() => {})
           console.log('did setup')
           window.vault.message({newidentity: null}).then(() => {
             window.vault.signin().then(() => {
