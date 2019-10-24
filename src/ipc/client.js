@@ -137,11 +137,30 @@ export function connect (uri, tag) {
  * @param {Array} args Method parameters
  */
 function message (endpoint, tag, call, args) {
-  return __context.message({
+  if (__context.__klaatu) {
+    return new Promise(function (resolve, reject) {
+      __context.message({
+        IPCRouterRequest: {
+          target: endpoint,
+          payload: {call: call, args: args, tag: tag}
+        }
+      }).then((result) => {
+        if (result.ipc_result) {
+          resolve(result.ipc_result)
+        } else {
+          reject(result.ipc_error)
+        }
+      }).catch((err) => {
+        reject(err)
+      })
+    })
+  } else {
+    return __context.message({
       IPCRouterRequest: {
         target: endpoint,
         payload: {call: call, args: args, tag: tag}
     }})
+  }
 }
 
 /**
