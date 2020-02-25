@@ -21,6 +21,7 @@
  */
 import * as appcache from './appcache'
 import * as ipc from './ipc/'
+import * as storage from './storage'
 import * as secp256k1 from './secp256k1'
 import * as runtime from './runtime'
 
@@ -184,6 +185,7 @@ export default class Vault {
     if (this.__onSetupReady !== undefined) return Promise.resolve()
 
     await ipc.init(this)
+    await storage.init(this)
     await secp256k1.init(this)
     await runtime.init(this)
     
