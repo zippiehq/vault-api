@@ -460,6 +460,9 @@ export default class Vault {
       // Ignore IPC messages which are handled in ipc module.
       if ('call' in event.data) return
 
+      // Ignore postmsg-rpc messages
+      if ('sender' in event.data && event.data.sender === "postmsg-rpc/server") return
+
       console.info('VAULT-API: Received message:', event.data)
 
       // If there's a receiver setup for this message, handle it.
