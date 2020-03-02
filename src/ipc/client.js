@@ -145,7 +145,7 @@ function message (endpoint, tag, call, args) {
           payload: {call: call, args: args, tag: tag}
         }
       }).then((result) => {
-        if (result.ipc_result) {
+        if ("ipc_result" in result) {
           resolve(result.ipc_result)
         } else {
           reject(result.ipc_error)
