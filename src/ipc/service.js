@@ -86,6 +86,7 @@ export function register (tag) {
   console.info('VAULT-API-IPC (Service): Attempting to register service:', tag)
 
   __services[tag] = {
+    init: function () {},
     getInterface: getInterface(tag)
   }
 
