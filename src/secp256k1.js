@@ -23,8 +23,20 @@ import shajs from 'sha.js'
 import * as appcache from './appcache'
 
 /**  @module secp256k1 */
+const ZIPPIE_ID_SERVICE_URI = "/ens/zippie/id.zippie"
+const ZIPPIE_ID_SERVICE_TAG = "zippie/id/secp256k1"
 
 var __context
+
+/**
+ * 
+ * @param {*} vault 
+ */
+async function init_V2 (vault) {
+  const __client = await vault.ipc.createClient(ZIPPIE_ID_SERVICE_URI, ZIPPIE_ID_SERVICE_TAG)
+  vault.secp256k1 = __client
+  return __client
+}
 
 /**
  * Initialize Vault API secp256k1 functionality.
@@ -36,6 +48,8 @@ var __context
  * @param {Vault} vault Vault API instance
  */
 export async function init (vault) {
+  if (vault.__klaatu) return await init_V2(vault)
+
   __context = vault
 
   vault.secp256k1 = {
