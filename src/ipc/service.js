@@ -86,12 +86,17 @@ export function register (tag) {
   console.info('VAULT-API-IPC (Service): Attempting to register service:', tag)
 
   __services[tag] = {
-    init: function () {},
-    getInterface: getInterface(tag)
+    methods: {
+      init: function () {},
+      getInterface: getInterface(tag),
+    },
+
+    streams: { },
   }
 
   return {
     addReceiver: addReceiver(tag),
+    addReceiverStream: addReceiverStream(tag),
     ready: serviceReady(tag),
     getLocalInterface: getLocalInterface(tag)
   }
@@ -108,7 +113,19 @@ function addReceiver (tag) {
   return function (f, symbol) {
     console.info('VAULT-API-IPC (Service): Adding "' + tag + '" receiver:', symbol || f.name)
     const service = __services[tag]
-    service[symbol || f.name] = f
+    service.methods[symbol || f.name] = f
+  }
+}
+
+/**
+ * 
+ * @param {string} tag 
+ */
+function addReceiverStream (tag) {
+  return function (f, symbol) {
+    console.info('VAULT-API-IPC (Service): Adding "' + tag + '" stream receiver:', symbol || f.name)
+    const service = __services[tag]
+    service.streams[symbol || f.name] = f
   }
 }
 
@@ -143,9 +160,16 @@ function getInterface (tag) {
     console.info('VAULT-API-IPC (Service): getInterface('+tag+')')
 
     const service = __services[tag]
-    return Object.keys(service)
+
+    const iface = []
+    Object.keys(service.methods)
       .filter(v => v !== 'getInterface')
-      .map(v => ({ type: 'method', name: v, arity: service[v].length }))
+      .forEach(v => iface.push({ type: 'method', name: v, arity: service[v].length }))
+
+    Object.keys(service.methods)
+      .forEach(v => iface.push({ type: 'stream', name: v, arity: service[v].length }))
+
+    return iface
   }
 }
 
@@ -163,8 +187,12 @@ function getLocalInterface (tag) {
 
     iface.origin = window.origin
 
-    Object.keys(service).forEach(k => {
-      iface[k] = service[k].bind(iface)
+    Object.keys(service.methods).forEach(k => {
+      iface[k] = service.methods[k].bind(iface)
+    })
+
+    Object.keys(service.streams).forEach(k => {
+      iface[k] = service.streams[k].bind(iface)
     })
 
     return iface
@@ -191,7 +219,7 @@ export async function dispatch (ev) {
     return
   }
 
-  const receiver = service[ev.data.call]
+  const receiver = service.methods[ev.data.call] || service.streams[ev.data.call]
   if (!receiver) {
     console.warn('VAULT-API-IPC (Service): Unrecognised service receiver:', ev.data.call)
     return
