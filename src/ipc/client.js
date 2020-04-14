@@ -116,8 +116,9 @@ export function connect (uri, tag) {
           inst[v.name] = method(uri, tag, v.name, v.arity)
         }
 
-        if (v.type === 'event') {
-          console.info('VAULT-API-IPC (CLIENT): Ignoring event type (not implemented yet!):', serviceId, v.name)
+        if (v.type === 'stream') {
+          console.info('VAULT-API-IPC (CLIENT): Generating streaming method:', serviceId, v.name, v.arity)
+          inst[v.name] = stream(uri, tag, v.name, v.arity)
         }
       })
 
@@ -136,15 +137,16 @@ export function connect (uri, tag) {
  * @param {string} call Method name
  * @param {Array} args Method parameters
  */
-function message (endpoint, tag, call, args) {
+function message (endpoint, tag, call, args = [], transfer = []) {
   if (__context.__klaatu) {
     return new Promise(function (resolve, reject) {
       __context.message({
         IPCRouterRequest: {
           target: endpoint,
-          payload: {call: call, args: args, tag: tag}
+          payload: { call, args, tag },
+          transfer,
         }
-      }).then((result) => {
+      }, transfer).then((result) => {
         if ("ipc_result" in result) {
           resolve(result.ipc_result)
         } else {
@@ -158,8 +160,9 @@ function message (endpoint, tag, call, args) {
     return __context.message({
       IPCRouterRequest: {
         target: endpoint,
-        payload: {call: call, args: args, tag: tag}
-    }})
+        payload: { call, args, tag },
+        transfer
+    }}, transfer)
   }
 }
 
@@ -174,8 +177,8 @@ function message (endpoint, tag, call, args) {
  * @param {string} call Method name
  * @param {Array} args Method parameters
  */
-function queue (endpoint, tag, method, args) {
-  return function () { return message(endpoint, tag, method, args) }
+function queue (endpoint, tag, method, args = [], transfer = []) {
+  return function () { return message(endpoint, tag, method, args, transfer) }
 }
 
 /**
@@ -197,5 +200,33 @@ function method (endpoint, tag, method, arity) {
       null,
       [endpoint, tag, method, Array.prototype.slice.call(arguments)]
     )
+  }
+}
+
+/**
+ * Create a remote IPC method call interface method which streams multiple responses.
+ * Used for constructing dynamic IPC client interfaces
+ * 
+ * @access private
+ * 
+ * @param {string} endpoint 
+ * @param {string} tag 
+ * @param {string} method 
+ * @param {Integer} arity 
+ */
+function stream (endpoint, tag, method, arity) {
+  return function () {
+    if (arguments.length < arity) throw 'INVALID_PARAMS'
+
+    const channel = new MessageChannel()
+    channel.port1.start()
+    channel.port2.start()
+
+    return message.apply(
+      null,
+      [endpoint, tag, method, Array.prototype.slice.call(arguments), [ channel.port1 ]]
+    ).then(r => {
+      return channel.port2
+    })
   }
 }

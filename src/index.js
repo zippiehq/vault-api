@@ -360,7 +360,7 @@ export default class Vault {
    * 
    * @returns {Promise} response
    */
-  message (req) {
+  message (req, transfer = []) {
     if (!this.__vault) {
       return Promise.reject({ error: 'Vault not initialized.' })
     }
@@ -370,7 +370,7 @@ export default class Vault {
       this.__receivers[id] = [resolve, reject]
 
       req.callback = id
-      this.__vault.postMessage(req, '*')
+      this.__vault.postMessage(req, '*', transfer)
     }.bind(this))
   }
 
