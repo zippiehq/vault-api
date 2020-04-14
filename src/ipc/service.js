@@ -226,9 +226,15 @@ export async function dispatch (ev) {
   }
 
   try {
-    var response = await receiver.apply({
-        origin: ev.data.origin
-      }, ev.data.args)
+    const context = {
+      origin: ev.data.origin,
+    }
+
+    if (ev.data.call in service.streams) {
+      context.stream = ev.ports[0]
+    }
+
+    var response = await receiver.apply(context, ev.data.args)
   } catch (e) {
     console.warn('VAULT-API-IPC (Service): Error calling receiver:', e)
     return ev.source.postMessage({
