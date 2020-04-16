@@ -185,7 +185,7 @@ export default class Vault {
     if (this.__onSetupReady !== undefined) return Promise.resolve()
 
     console.info('VAULT-API: Setting up Zippie Vault enclave.')
-    return new Promise(function (resolve, reject) {
+    return new Promise(async function (resolve, reject) {
       //
       // Zippie 2.0 (Klaatu) Support
       //
