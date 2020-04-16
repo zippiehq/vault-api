@@ -199,15 +199,15 @@ export default class Vault {
         this.__on_message = this.__on_message.bind(this)
         this.__vault = window.parent
 
+        await ipc.init(this)
+        await storage.init(this)
+        await secp256k1.init(this)
+        await runtime.init(this)
+  
         window.addEventListener('message', this.__on_message)
         return resolve()
       }
-
-      await ipc.init(this)
-      await storage.init(this)
-      await secp256k1.init(this)
-      await runtime.init(this)
-      
+    
       //
       // Zippie 1.0 Support
       //
@@ -246,6 +246,11 @@ export default class Vault {
       // Setup async response handlers for when we hear "ready" from vault.
       this.__onSetupReady = resolve
       this.__onSetupError = reject
+
+      await ipc.init(this)
+      await storage.init(this)
+      await secp256k1.init(this)
+      await runtime.init(this)
 
       console.info('VAULT-API: Loading vault from URI:', this.__iframe.src)
     }.bind(this))
