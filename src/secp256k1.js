@@ -48,7 +48,7 @@ async function init_V2 (vault) {
  * @param {Vault} vault Vault API instance
  */
 export async function init (vault) {
-  if (vault.__klaatu) return await init_V2(vault)
+  if (vault.__klaatu) return
 
   __context = vault
 
