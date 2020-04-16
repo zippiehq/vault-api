@@ -184,11 +184,6 @@ export default class Vault {
     // Don't allow setup to be called multiple times.
     if (this.__onSetupReady !== undefined) return Promise.resolve()
 
-    await ipc.init(this)
-    await storage.init(this)
-    await secp256k1.init(this)
-    await runtime.init(this)
-    
     console.info('VAULT-API: Setting up Zippie Vault enclave.')
     return new Promise(function (resolve, reject) {
       //
@@ -208,6 +203,11 @@ export default class Vault {
         return resolve()
       }
 
+      await ipc.init(this)
+      await storage.init(this)
+      await secp256k1.init(this)
+      await runtime.init(this)
+      
       //
       // Zippie 1.0 Support
       //
