@@ -164,10 +164,10 @@ function getInterface (tag) {
     const iface = []
     Object.keys(service.methods)
       .filter(v => v !== 'getInterface')
-      .forEach(v => iface.push({ type: 'method', name: v, arity: service[v].length }))
+      .forEach(v => iface.push({ type: 'method', name: v, arity: service.methods[v].length }))
 
-    Object.keys(service.methods)
-      .forEach(v => iface.push({ type: 'stream', name: v, arity: service[v].length }))
+    Object.keys(service.streams)
+      .forEach(v => iface.push({ type: 'stream', name: v, arity: service.streams[v].length }))
 
     return iface
   }
