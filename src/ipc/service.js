@@ -237,6 +237,7 @@ export async function dispatch (ev) {
     var response = await receiver.apply(context, ev.data.args)
   } catch (e) {
     console.warn('VAULT-API-IPC (Service): Error calling receiver:', e)
+    console.trace()
     return ev.source.postMessage({
       IPCRouterRequest: {
         target: window.origin,
