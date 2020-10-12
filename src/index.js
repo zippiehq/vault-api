@@ -188,6 +188,7 @@ export default class Vault {
   async close () {
     if (this.__klaatu_popup) {
       this.__vault.close()
+      this.__vault = undefined
     } else {
       throw new Error('Not a popup')
     }
@@ -491,6 +492,10 @@ export default class Vault {
       }      
       if ('login' in event.data || 'ready' in event.data) {
         console.info('VAULT-API: processing vault login/ready message.')
+        
+        if (this.__klaatu) {
+           return this.__onSetupReady()
+        }
 
         this.__get_vault_attr('version')() 
           .then(this.__get_vault_attr('config'))
