@@ -206,7 +206,6 @@ export default class Vault {
       if (this.__klaatu) {
         if (this.__klaatu_popup) {
           this.__vault = window.open(this.__klaatu_popup.url + '/popup.html', '_blank', this.__klaatu_popup.specs)
-          this.__vault.postMessage({ready: true}, this.__klaatu_popup.url + '/')
         } else {
           this.__vault = window.parent
         }
@@ -486,7 +485,10 @@ export default class Vault {
         // Call receiver promise resolve
         return receiver[0](event.data.result)
       }
-
+      if ('handshake' in event.data && this.__klaatu_popup) { 
+         this.__vault.postMessage({ready: true}, this.__klaatu_popup.url + '/')
+         return
+      }      
       if ('login' in event.data || 'ready' in event.data) {
         console.info('VAULT-API: processing vault login/ready message.')
 
