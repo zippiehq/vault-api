@@ -108,6 +108,11 @@ export default class Vault {
     } else {
       this.__klaatu = false
     }
+    
+    if (opts.klaatu_popup) {
+      this.__klaatu_popup = opts.klaatu_popup
+    }
+    
 
     if (!this.__klaatu) {
       // Parse params from URI fragment
@@ -165,7 +170,6 @@ export default class Vault {
       this.__iframe = iframe
       this.__vault = iframe.contentWindow
     }
-
     this.__opts = opts
   }
 
@@ -180,32 +184,51 @@ export default class Vault {
    * 
    * @method Vault#setup
    */
+
+  async close () {
+    if (this.__klaatu_popup) {
+      this.__vault.close()
+    } else {
+      throw new Error('Not a popup')
+    }
+  }
+
   async setup () {
     // Don't allow setup to be called multiple times.
     if (this.__onSetupReady !== undefined) return Promise.resolve()
 
     console.info('VAULT-API: Setting up Zippie Vault enclave.')
     return new Promise(async function (resolve, reject) {
+      
       //
       // Zippie 2.0 (Klaatu) Support
       //
       if (this.__klaatu) {
-        console.info('VAULT-API: Running in Klaatu') 
+        if (this.__klaatu_popup) {
+          this.__vault = window.open(this.__klaatu_popup.url + '/popup.html', '_blank', this.__klaatu_popup.specs)
+          this.__vault.postMessage({ready: true}, this.__klaatu_popup + '/')
+        } else {
+          this.__vault = window.parent
+        }
+        console.info('VAULT-API: Running in Klaatu, popup: ', this.__klaatu_popup) 
         // Setup async response handlers for when we hear "ready" from vault.
         this.__onSetupReady = resolve
         this.__onSetupError = reject
 
         // Setup incoming message handler.
         this.__on_message = this.__on_message.bind(this)
-        this.__vault = window.parent
-
+ 
         await ipc.init(this)
         await storage.init(this)
         await secp256k1.init(this)
         await runtime.init(this)
   
         window.addEventListener('message', this.__on_message)
-        return resolve()
+        if (this.__klaatu_popup) {
+          return
+        } else {
+          return resolve()
+        }
       }
     
       //
