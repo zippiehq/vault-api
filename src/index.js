@@ -206,7 +206,7 @@ export default class Vault {
       if (this.__klaatu) {
         if (this.__klaatu_popup) {
           this.__vault = window.open(this.__klaatu_popup.url + '/popup.html', '_blank', this.__klaatu_popup.specs)
-          this.__vault.postMessage({ready: true}, this.__klaatu_popup + '/')
+          this.__vault.postMessage({ready: true}, this.__klaatu_popup.url + '/')
         } else {
           this.__vault = window.parent
         }
