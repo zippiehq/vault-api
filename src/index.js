@@ -113,6 +113,9 @@ export default class Vault {
       this.__klaatu_popup = opts.klaatu_popup
     }
     
+    if (opts.klaatu_embed) {
+      this.__klaatu_embed = opts.klaatu_embed
+    }
 
     if (!this.__klaatu) {
       // Parse params from URI fragment
@@ -131,6 +134,14 @@ export default class Vault {
     // Message receiver dispatch variables
     this.__callback_counter = 0
     this.__receivers = {}
+    
+    if (this.__klaatu_embed) {
+       var iframe = document.createElement('iframe')
+       iframe.src = 'https://dev.zippie.com'
+       this.__klaatu_embed.root.appendChild(iframe)
+       this.__iframe = iframe
+       this.__vault = iframe.contentWindow
+    }
 
     if (!this.__klaatu) {
       // Construct iframe to load vault enclave
@@ -186,7 +197,7 @@ export default class Vault {
    */
 
   async close () {
-    if (this.__klaatu_popup) {
+    if (this.__klaatu_popup || this.__klaatu_embed) {
       this.__vault.close()
       this.__vault = undefined
     } else {
@@ -207,10 +218,11 @@ export default class Vault {
       if (this.__klaatu) {
         if (this.__klaatu_popup) {
           this.__vault = window.open(this.__klaatu_popup.url + '/popup.html', '_blank', this.__klaatu_popup.specs)
-        } else {
+        } else if (!this.__klaatu_embed) {
           this.__vault = window.parent
         }
         console.info('VAULT-API: Running in Klaatu, popup: ', this.__klaatu_popup) 
+        console.info('VAULT-API: embed: ', this.__klaatu_embed)
         // Setup async response handlers for when we hear "ready" from vault.
         this.__onSetupReady = resolve
         this.__onSetupError = reject
@@ -224,7 +236,7 @@ export default class Vault {
         await runtime.init(this)
   
         window.addEventListener('message', this.__on_message)
-        if (this.__klaatu_popup) {
+        if (this.__klaatu_popup || this.__klaatu_embed) {
           return
         } else {
           return resolve()
@@ -393,13 +405,24 @@ export default class Vault {
       return Promise.reject({ error: 'Vault not initialized.' })
     }
 
+
     return new Promise(function (resolve, reject) {
       let id = 'callback-' + this.__callback_counter++
       this.__receivers[id] = [resolve, reject]
-
       req.callback = id
+
       this.__vault.postMessage(req, '*', transfer)
     }.bind(this))
+  }
+
+  messageNoAsync (req, transfer = []) {
+    if (!this.__vault) {
+      return Promise.reject({ error: 'Vault not initialized.' })
+    }
+
+    req.callback = 'NOASYNC'
+
+    this.__vault.postMessage(req, '*', transfer)
   }
 
   /**
@@ -490,6 +513,10 @@ export default class Vault {
          this.__vault.postMessage({ready: true}, this.__klaatu_popup.url + '/')
          return
       }      
+      if ('handshake' in event.data && this.__klaatu_embed) {
+         this.__vault.postMessage({wm_register_parent:{}}, '*') // fixme
+         return
+      }
       if ('login' in event.data || 'ready' in event.data) {
         console.info('VAULT-API: processing vault login/ready message.')
         
