@@ -137,7 +137,7 @@ export default class Vault {
     
     if (this.__klaatu_embed) {
        var iframe = document.createElement('iframe')
-       iframe.src = 'https://dev.zippie.com'
+       iframe.src = this.__klaatu_embed.url ? this.__klaatu_embed.url + '#embed' : 'https://dev.zippie.com#embed'
        iframe.id = 'klaatuembed'
        this.__klaatu_embed.root.appendChild(iframe)
        this.__iframe = iframe
